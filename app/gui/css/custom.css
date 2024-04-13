@@ -1,0 +1,879 @@
+/* LOWCODE-DATA-APP / copyright 2024 by ma-ha https://github.com/ma-ha  /  MIT License */
+
+:root {
+  --main-bg-color: #ffffff;
+  --main-color: #222222;
+  --header-bg-color: #222222;
+  --footer-bg-color: #222222;
+  --footer-color: #d5d5d5;
+  --theme-color: #01699b;
+  --menu-bg-color: #444444;
+  --menu-bg-active-color: #01699b;
+  --menu-bg-hover-color: #81c3e8;
+  --menu-color: #ffffff;
+  --link-color: #444444;
+  --link-active-color: #000000;
+  --content-h-bg-color: #81c3e8;
+}
+/* ------ BEGIN COLOR SCHEME --------*/
+html {
+  background-color: var(--main-bg-color);
+}
+
+body {
+background-color: var(--main-bg-color);
+color: var(--main-color);
+color: rgb(66, 84, 102);
+font-family: "sohne-var", "Helvetica Neue", "Arial", sans-serif;
+font-weight: 300;
+letter-spacing: 0.2px;
+}
+b {
+font-weight: bold;
+}
+
+#headerdiv, #header  {
+  background-color: var(--header-bg-color);
+}
+
+#footerdiv, #footer  {
+  background-color: var(--footer-bg-color);
+}
+
+#WikiContent,
+#referencesContent ,
+#aboutContent{
+  color: #777;
+}
+
+.header-logo h1,
+.header-logo,
+.header-logo-text,
+#WikiContent h1,
+.pong-markdown h1,
+.pong-markdown h2,
+.pong-markdown h3,
+.pong-markdown h4,
+.pong-markdown b,
+#aboutContent h1,
+#referencesContent h1,
+#WikiContent b,
+#aboutContent b,
+#referencesContent b,
+.main-page-content a:link,
+.main-page-content a:visited,
+.main-page-content b,
+.explain-msg,
+#DocuContent a:link,
+#DocuContent a:visited,
+.note .add,
+
+.pongNavBarItem,
+#SecurityHeader,
+#SecurityHeaderPullDown
+{
+  background-color: var(--menu-bg-color);
+}
+
+#DocuContent h1,
+#DocuContent h2,
+#DocuContent h3,
+#DocuContent h4,
+.main-page-head,
+.pongNavBarItemInfo,
+
+.pongNavBarItemActive {
+  background-color: var(--menu-bg-active-color);
+  opacity:1;
+}
+#header a:visited {
+  color: unset;
+}
+#header .pong-navbar a:link,
+#SecurityHeader,
+
+#header .pong-navbar a:link ,
+#header .pong-navbar a:visited,
+#header .pongNavBarItem a:hover,
+.PongUserPage {
+  color: var(--menu-color);
+}
+
+#footer  a:link, 
+#footer a:visited   {
+  color: var(--footer-link-color);
+}
+
+#footer a:hover  {
+  color: var(--footer-link-active-color);
+}
+#footer .copyright-div  {
+  color: var(--footer-color);
+}
+
+.PongChPwd, 
+.PongLongout,
+.SecurityHeaderPullDownItem 
+{
+  color:#222;
+}
+
+#WikiContent a:link, 
+#WikiContent a:visited,
+#aboutContent a:link, 
+#aboutContent a:visited,
+#referencesContent a:link, 
+#referencesContent a:visited,
+.pong-markdown a:link,
+.pong-markdown a:visited,
+.pongTable a:link, 
+.pongTable a:visited,
+.htmldiv a:link, 
+.htmldiv a:visited { 
+  color: var(--link-color);
+}
+
+#WikiContent a:hover, 
+#WikiContent a:active ,
+#aboutContent a:hover, 
+#aboutContent a:active,
+#referencesContent a:hover, 
+#referencesContent a:active,
+.pong-markdown a:hover,
+.pong-markdown a:active,
+.pongTable a:hover, 
+.pongTable a:active {
+  color: var(--link-active-color);
+}
+
+.pongNavBarPullDownItem {
+  background-color:var(--menu-bg-color);
+}
+
+.SecurityHeaderPullDownItem:hover,
+#SecurityHeader:hover,
+.pongNavBarItem:hover,
+.pongNavBarPullDownItem:hover {
+  background-color:var(--menu-bg-hover-color);
+}
+
+/* ------END COLOR SCHEME ---------*/
+
+#header { 
+height: 120px;
+}
+
+#headerdiv {
+  box-shadow:#000 0 0 8px 0;  
+  margin-bottom: 5px;
+}
+
+/* .page-width, */
+.root-row {
+  width: 96%;
+} 
+
+#footerdiv {
+  box-shadow:#000 0 0 8px 0;  
+  margin-top: 5px;
+}
+
+
+.res-title {
+    position: unset;
+}
+
+#MainNav {
+width:auto;
+min-width:500px;
+height: 40px;
+position: absolute;
+float: left;
+bottom: 10px;
+left: 0;
+padding: 0 0 0 8px;
+text-align: right;
+box-sizing:border-box;
+top: 90px;
+}
+
+.header-logo {
+  line-height: 36px;
+  height:40px;
+  width:100%;
+  padding:0;
+}
+
+.header-logo-text {
+  padding-top: 10px;
+}
+
+.header-logo h1 {
+  min-width:420px;
+  margin:0;
+  padding:10px 0 0 10px;
+  box-sizing:border-box;
+  font-size:2.8em;
+  font-weight:normal;
+  text-transform: uppercase;
+}
+
+.header-logo-tenant {
+  font-size: 0.8em;
+}
+
+.header-logo  a,
+.header-logo  a:link,
+.header-logo  a:visited {
+color: var(--theme-color);
+}
+
+#SecurityHeader {
+  height: 40px;
+  min-width: 114px;
+  text-align: center;
+  padding: 4px;
+  padding-top: 15px;
+  margin-top: 2px;
+  border-radius: 3px;
+  box-sizing: border-box;
+  transition: 0.35s;
+  cursor: pointer;
+  user-select: none;
+  font-size:12px;
+  background-color: unset;
+}
+
+#SecurityHeader a:focus {
+  outline:none !important;
+}
+
+#ServiceStatusContent {
+  height: auto !important;
+  position: relative;
+}
+
+#header a:link, #header a:visited {
+  text-decoration:none;
+}
+
+#header .pong-navbar a:link {
+  width: 100%;
+  display: block;
+}
+
+
+#SecurityHeaderPullDown {
+  width:128px;
+  padding:0;
+  border-radius:3px;
+  top:36px;
+  box-shadow:#222 0 0 8px;
+}
+
+.PongChPwd, .PongLongout {
+  text-decoration:none;
+}
+
+#Sec2, 
+#SecurityHeader {
+--menu-bg-hover-color: unset;
+}
+
+#SecLogin {
+height: 25px;
+font-size: 1.2em;
+color: var(--menu-color);
+position: absolute;
+top:5px;
+}
+
+#PongSecLoginBtn {
+width: 110px;
+height: 25px;
+font-size: 11pt;
+}
+
+#SecResetPwdURL {
+position: absolute;
+top: 40px;
+width: 110px;
+}
+#SecRegistgerURL {
+position: absolute;
+top: 55px;
+}
+
+#SecLoginUrl {
+  height: 25px;
+  font-size: 1.2em;
+}
+.PongRegister,
+.PongResetPwd {
+  font-size: 0.9em;
+}
+
+.SecurityHeaderPullDownItem {
+  width:128px;
+  height:36px;
+  line-height:36px;
+  border-radius:3px;
+  text-align:center;
+  line-height:30px;
+  transition:0.35s;
+}
+
+.SecurityHeaderPullDownItem a {
+  width:128px;
+  height:36px;
+  line-height:36px;
+}
+
+
+.PullDownBtn {
+  right: unset;
+}
+
+#LangSel {
+  top: 16px;
+  right: 130px;
+  width: 9%;
+}
+
+.aTabRowDiv {
+  margin: 0px;
+}
+
+/* ------------------------------------------------------------------------ */
+
+#Wiki {
+  height: unset;
+}
+#WikiTitle,
+#aboutTitle,
+#referencesTitle {
+  display: none;
+}
+#WikiContent h1,
+#aboutContent h1,
+#referencesContent h1parentCatId {
+  font-size: 1.5em;
+  text-decoration: none;
+}
+#WikiContent,
+#referencesContent ,
+#aboutContent{
+  height: 100%;
+}
+
+
+#Wiki code,
+#Wiki tt {
+  font-size: 0.8em;
+  color: #6546d8de;
+}
+
+/* ------------------------------------------------------------------------ */
+
+.pongNavBarPullDown {
+  width: 150px;
+}
+
+.pongNavBarPullDownItem {
+  width: 100%;
+  height: 25px;
+  margin-top: 8px;
+  margin-bottom: 7px;
+  border-radius: 5px;
+  transition: 0.35s;
+}
+
+body {
+font-size:16px;
+font-family: "Helvetica", "Arial", "Verdana", "sans-serif"
+}
+
+body.waiting * {
+  cursor: progress;
+}
+
+#maindiv {
+  margin: 0 auto;
+}
+
+
+/* #LangSel {
+  display: none;
+} */
+
+/* input[type=checkbox] {
+  transform: scale(2); 
+} */
+
+.pong-table {
+  overflow: auto;
+  float: left;
+  width: 98%;
+}
+
+/* ==================================================== */
+
+.decor-tm-title,
+.ui-widget {
+  font-size: 1em;
+  font-family: "Helvetica", "Arial", "Verdana", "sans-serif";
+}
+
+.pongTable {
+  font-size:1.0em;
+}
+
+#SupportReqContentPongTable {
+  font-size: 0.8em;
+}
+
+.pongTableDiv {
+  height: auto !important;
+}
+
+.pongNavBarItemInfo {
+  background-color: unset;
+  color: #f6cd4b;
+  font-size: 0.7em;
+  height: 50%;
+}
+
+.pongNavBarItem {
+  width: 150px;
+  height: 24px;
+  border-radius: 3px;
+  font-size:16px;
+  text-decoration: none;
+  line-height: 24px;
+  transition:0.35s;
+  cursor:pointer;
+}
+
+.pongNavBarItem a {
+  text-decoration: none;
+}
+
+.pongNavBarPullDownMenu {
+background-color: var(--menu-bg-color);
+}
+.pongNavBarPullDownMenu {
+  padding: 5px 20px 5px 20px;
+}
+
+.pongNavBarPullDownItem {
+  text-align: left;
+}
+
+#navSubMenu5 {
+width: 190px;
+}
+
+.pongIconAppsContent {
+  width: 180px;
+  height: 138px;
+}
+#AppsContent .pongIconImg {
+  height: 115px;
+}
+
+/* All Forms --------------------------------------------- */
+.pongFormField label {
+  font-size: 0.9em;
+  width: 200px;
+  /* font-weight: bold; */
+}
+
+
+/* Psssword Reset Form --------------------------------------------- */
+
+
+#header .header-links {
+  top: 43px;
+  right: 30px;
+  font-size: 0.6em;
+}
+
+.warning {
+  color: #A42;
+  font-size: 0.8em;
+}
+
+.pongFormField label { 
+  /* vertical-align: top; */
+  display: block; 
+}
+.pongFormField p { 
+  margin: 0px;
+}
+.pongFormField input { 
+  clear: left; 
+  display: block; 
+  width: 300px;
+}
+
+
+.pongFormField input[type=checkbox]
+{
+    width: unset;
+}
+.pongFormField select { 
+  clear: left; 
+  display: block; 
+  width: 300px;
+}
+.pongFormField textarea { 
+  clear: left; 
+  display: block; 
+  width: 300px;
+}
+.pongFormField .ui-disabled {
+  color: #555;
+  opacity: 0.8 !important;
+  background-color: #EEE;
+}
+
+.availableFields {
+  font-size: 0.8em;
+}
+
+/* Main Page Content ---------------------------------------------- */
+.main-page-div {
+  width: 90%;
+  position: absolute;
+  left: 50px;
+}
+.main-page-head {
+  width: 100%;
+  font-size: 1.2em;
+  text-transform: uppercase;
+  color: #CCC;
+  padding: 5px;
+  font-stretch: ultra-expanded;
+}
+.main-page-content a:link,
+.main-page-content a:visited {
+  font-weight: bold;    
+}
+.main-page-content a:hover {
+  color: #457e99;
+  font-weight: bold;    
+}
+.main-page-content b {
+  font-weight: bold;
+}
+
+#ExplainContent {
+  margin-top: 10px; 
+}
+
+#ExplainCont {
+  margin-top: 15px;
+  height: 211px;
+}
+.explain-arg {
+  width: 50%;
+  height: 20%;
+  float: left;
+}
+.explain-img {
+  width: 10%;
+  float: left;
+  margin-left: 10%
+}
+.explain-txt {
+  width: 80%;
+  float: left;
+}
+.explain-msg {
+  margin-left: 30%;
+  font-size: 1.5em;
+  height: 15%;
+  float: left;
+  margin-top: 1%;
+  font-variant: small-caps;
+  font-weight: bold;
+  font-stretch: extra-expanded;
+}
+
+
+/* ===== GTC, Imprint, Privacy ===============================*/
+#GTC h1, 
+#PRV h1, 
+#IMP h1 {
+margin-top: 20px;
+}
+
+#IMPTitle, 
+#PRVTitle, 
+#GTCTitle {
+  display: none;
+}
+
+/* ===== Welcome Page ===============================*/
+
+#welcomeTitle {
+  display: none;
+}
+#welcome {
+  height: 760px;
+  overflow: auto;
+}
+
+.welcomediv {
+  width:90%;
+  padding-left: 5%;
+  padding-right: 5%;
+  clear: both;
+  height: auto;
+  overflow: auto;
+  padding-bottom: 20px;
+  font-size: 1.1em;
+}
+
+.htmldiv .pre-h1{
+  color: #4ca5d0;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+.htmldiv h1, .htmldiv h2, .htmldiv h3 {
+  margin-top: 5px;
+  color:  var(--theme-color);
+}
+.htmldiv h1 {
+  font-size: 2.0em;
+  margin-bottom: 5px;
+}
+.htmldiv h2 {
+  font-size: 1.15em;
+  margin-bottom: 5px;
+}
+.htmldiv h3 {
+  font-size: 1.6em;
+}
+#welcome1 h1 {
+  margin-bottom: 20px;
+}
+#welcomeContent b,
+#docuContent b,
+#docuContent strong {
+  color: var(--theme-color);
+}
+#welcome1 {
+  padding-top: 30px;
+  padding-bottom: 10px;
+  height: 130px;
+  background-color: #4ca5d0;
+  background-image: url("../img/bg-w1.png");
+  background-size: 100%;
+}
+.linkbtn {
+  border: 1px solid #fff;
+  padding: 10px;
+  text-decoration: none;
+}
+#welcome1 a:link, .orderdiv a:link {
+  color: white;
+  font-weight: bold;
+}
+#welcome1 a:visited, .orderdiv a:visited  {
+  color: white;
+  font-weight: bold;
+}
+#welcome1 a:hover, .orderdiv a:hover  {
+  color: rgb(214, 229, 233);
+  font-weight: bold;
+}
+#welcome1 h1, #welcome1 .pre-h1 {
+  color: white;
+}
+#welcome-img1 {
+  position: absolute;
+  right: 10%;
+  /* bottom: 70%; */
+  top: 40px;
+}
+#welcome-img2 {
+  display: none;
+}
+.img-shaddow {
+  margin-top: 7px;
+  box-shadow: 10px 10px 5px #666;
+  -moz-box-shadow: 10px 10px 5px #666;
+  -webkit-box-shadow: 10px 10px 5px #666;
+  -khtml-box-shadow: 10px 10px 5px #666;
+}
+
+.welcome1box {
+  width: 23.8%;
+  min-height: 300px;
+  height: auto;
+  background-color: #2ca7ee15;
+  float: left;
+  margin-right: 1%;
+}
+.welcome1ico {
+  width: auto;
+  height: auto;
+  text-align: center;
+  margin-top: 5%;
+}
+.welcome1txt {
+  width: 90%;
+  height: auto;
+  margin: 5%;
+  text-align: center;
+  font-size: 1.1em;
+}
+
+
+#welcome2 {
+  width: 80%;
+}
+#welcome2txt {
+  width: 80%;
+  padding: 2%;
+  font-size: 1.1em;
+}
+
+
+#welcome2c img {
+  width: 100%;
+}
+
+#welcome2boxes, #welcome3boxes, #planboxes {
+  width: 100%;
+  height: auto;
+}
+.welcome2Abox {
+  width: 27%;
+  min-height: 370px;
+  height: auto;
+  background-color: #2ca7ee15;
+  float: left;
+  margin-right: 2%;
+}
+.welcome2box {
+  width: 27%;
+  min-height: 350px;
+  height: auto;
+  background-color: #2ca7ee15;
+  float: left;
+  margin-right: 2%;
+}
+.welcome2box ul {
+  padding-left: 20px;
+}
+
+#welcome2Abox3 {
+  width: 40%;
+  margin-right: 0px;
+}
+
+#welcome2box1 {
+  width: 40%;
+  background-color: transparent;
+}
+
+.welcome2boxtxt, .planboxtxt, .planboxtxtwprice {
+  margin: 3%;
+}
+
+.welcome3box {
+  width: 30%;
+  min-height: 265px;
+  height: auto;
+  float: right;
+  margin-right: 20%;
+}
+
+#welcome3security {
+  clear: left;
+  width: 80%;
+  font-size: 1.1em;
+}
+
+/* DOCU =================================== */
+
+.docudiv {
+  width:80%;
+  padding-left: 10%;
+  padding-right: 10%;
+  clear: both;
+  height: auto;
+  overflow: auto;
+  padding-bottom: 20px;
+}
+
+code {
+  font-size: 0.8em;
+  color: #01699b;
+  font-weight: bold;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.sourcecode {
+  width: 60%;
+  margin-top: 20px;
+  margin-left: 5%;
+  margin-bottom: 20px;
+}
+
+.sourcecode-code {
+  background-color: #444444;
+  width: 100%;
+  padding: 10px;
+  overflow-x: auto;
+}
+
+.sourcecode-title {
+  background-color: #DDD;
+  color: #000;
+  width: 100%; 
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+
+  border-radius: 5px 5px 0 0;
+  -moz-border-radius: 5px 5px 0 0;
+  -o-border-radius: 5px 5px 0 0;
+  -webkit-border-radius: 5px 5px 0 0;
+}
+
+.img-margin {
+  margin: 10px;
+}
+
+#DbDocContentdoc {
+  width: 1400px;
+  height: 380px;
+}
+
+#DbCollectionsContentPongTable button,
+#DbDocumentsContentPongTable button {
+  padding: 0px 20px 0 20px;
+}
+
+#DbDocContentedit {
+  width: 1400px;
+  height: 425px;
+}
+/* WIKI */
+
+#docuheadTitle {
+  display: none;
+}
+
+#docuContent {
+  padding-left: 10%;
+  padding-right: 10%;
+}
+
+.markdownNav {
+  display: none;
+}
