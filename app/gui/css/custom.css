@@ -46,9 +46,6 @@ font-weight: bold;
   color: #777;
 }
 
-.header-logo h1,
-.header-logo,
-.header-logo-text,
 #WikiContent h1,
 .pong-markdown h1,
 .pong-markdown h2,
@@ -67,7 +64,6 @@ font-weight: bold;
 #DocuContent a:link,
 #DocuContent a:visited,
 .note .add,
-
 .pongNavBarItem,
 #SecurityHeader,
 #SecurityHeaderPullDown

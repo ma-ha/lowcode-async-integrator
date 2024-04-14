@@ -6,11 +6,11 @@ const pjson     = require( './package.json' )
 log.info( `Starting ${pjson.name} v${pjson.version} NODE_ENV=${process.env.NODE_ENV}` )
 
 const path      = require( 'path' )
+const db        = require( './db' )
 const appGUI    = require( './gui/gui' )
 const appSec    = require( './gui/app-sec' )
 const appAPI    = require( './api/api' )
 const apiSec    = require( './api/api-sec' )
-
 
 exports: module.exports = {
   init
@@ -18,6 +18,8 @@ exports: module.exports = {
 
 async function init( lowCodeConfig ) {
   let cfg = checkConfig( lowCodeConfig )
+
+  db.initDB( cfg )
 
   apiSec.init( cfg )
   let app = appGUI.init( cfg )
@@ -46,14 +48,17 @@ async function init( lowCodeConfig ) {
 function checkConfig( cfg ) {
   if ( ! cfg ) {  cfg = {} } 
 
-  checkCfgParam( cfg, 'POD_ROLE', 'MANAGER' )
+  checkCfgParam( cfg, 'POD_MODE', 'MANAGER' )
+  checkCfgParam( cfg, 'LOWCODE_DB_API_URL', 'http://localhost:8888/app/adapter/' )
+  checkCfgParam( cfg, 'LOWCODE_DB_API_ID', 'change-me' )
+  checkCfgParam( cfg, 'LOWCODE_DB_API_KEY', 'change-me' )
 
   checkCfgParam( cfg, 'PROVISIONING_API_KEY', 'CHANGE_ME' )
   checkCfgParam( cfg, 'CONFIG_DIR', '../pod-cfg/' )
   
   checkCfgParam( cfg, 'URL_PATH', '/' )
-  checkCfgParam( cfg, 'PORT', 8889 )
-  checkCfgParam( cfg, 'GUI_URL','http://localhost:' + cfg.PORT + cfg.URL_PATH )
+  checkCfgParam( cfg, 'POD_PORT', 8889 )
+  checkCfgParam( cfg, 'POD_URL','http://localhost:' + cfg.POD_PORT + cfg.URL_PATH )
 
   checkOidcParams( cfg )
 

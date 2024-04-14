@@ -50,7 +50,8 @@ function init( appConfig ) {
 
 async function initPages( ) {
   /** Initialize the framework and the default page */
-  gui.init( PRD_NAME, cfg.PORT, cfg.URL_PATH )
+  log.info( 'INIT PAGES', cfg.POD_PORT, cfg.POD_URL_PATH )
+  gui.init( PRD_NAME, cfg.POD_PORT, cfg.POD_URL_PATH )
   gui.pages['main'].title    = 'LowCode'
   gui.pages['main'].navLabel = "What's it"
   gui.pages['main'].setPageWidth( '90%' )
@@ -164,44 +165,44 @@ async function genPageHeader ( pgHeader, req, page ) {
       }
     }
 
-    let user = await userDta.getUserInfoFromReq( gui, req )
-    // log.info( 'genPageHeader', user )
-    if ( user ) { 
-      pgHeader.logo = { text: '<a href="index.html">'+await userDta.getScopeName( user.rootScopeId ) +'</a>' }
+    // let user = await userDta.getUserInfoFromReq( gui, req )
+    // // log.info( 'genPageHeader', user )
+    // if ( user ) { 
+    //   pgHeader.logo = { text: '<a href="index.html">'+await userDta.getScopeName( user.rootScopeId ) +'</a>' }
 
-      if ( user.rootScopeId != user.scopeId ) {
-        pgHeader.logo.text += '<br/><span class="header-logo-tenant">'+ await userDta.getScopeName( user.scopeId ) + '</span>'
-      }
+    //   if ( user.rootScopeId != user.scopeId ) {
+    //     pgHeader.logo.text += '<br/><span class="header-logo-tenant">'+ await userDta.getScopeName( user.scopeId ) + '</span>'
+    //   }
     
-      let scopeTbl = await userDta.getScopeList( user.userId )
-      let menuItems = []
-      for ( let scope in scopeTbl ) {
-        let ident = ''
-        let deepth = (scope.match(/\//g) || []).length
-        for ( let i = 0; i < deepth; i++ ) { ident += '&nbsp;&nbsp;'} 
-        if ( page == 'AppEntity-nonav' ) {
-          if ( req.query.id ) {
-            page += '&app='+ req.query.id
-          }
-        }
-        menuItems.push({ html: ident + '<a href="setscope?id='+scope+'&layout='+page+'">'+scopeTbl[ scope ].name+'</a>', id: scope })
-      }
+    //   let scopeTbl = await userDta.getScopeList( user.userId )
+    //   let menuItems = []
+    //   for ( let scope in scopeTbl ) {
+    //     let ident = ''
+    //     let deepth = (scope.match(/\//g) || []).length
+    //     for ( let i = 0; i < deepth; i++ ) { ident += '&nbsp;&nbsp;'} 
+    //     if ( page == 'AppEntity-nonav' ) {
+    //       if ( req.query.id ) {
+    //         page += '&app='+ req.query.id
+    //       }
+    //     }
+    //     menuItems.push({ html: ident + '<a href="setscope?id='+scope+'&layout='+page+'">'+scopeTbl[ scope ].name+'</a>', id: scope })
+    //   }
 
-      menuItems.sort( ( a, b ) => {
-        if ( a.id > b.id ) { return 1 }
-        return -1
-      })
+    //   menuItems.sort( ( a, b ) => {
+    //     if ( a.id > b.id ) { return 1 }
+    //     return -1
+    //   })
 
-      let actScope = await userDta.getSelScopeName( user.userId )
-      pgHeader.modules.push({ 
-        id    : "ScopeSel", 
-        type  : "pong-pulldown", 
-        moduleConfig : {
-          title: 'Scope: '+actScope,
-          menuItems : menuItems
-        }
-      })
-    }
+    //   let actScope = await userDta.getSelScopeName( user.userId )
+    //   pgHeader.modules.push({ 
+    //     id    : "ScopeSel", 
+    //     type  : "pong-pulldown", 
+    //     moduleConfig : {
+    //       title: 'Scope: '+actScope,
+    //       menuItems : menuItems
+    //     }
+    //   })
+    // }
     // log.info( pgHeader )
     // resolve( pgHeader )
     return pgHeader
