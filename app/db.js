@@ -4,7 +4,8 @@ const log    = require( './helper/log' ).logger
 const axios  = require( 'axios' )
 
 exports: module.exports = { 
-  initDB
+  initDB,
+  registerPod
 }
 
 let HEADERS = null
@@ -47,6 +48,39 @@ async function prepareDbApp( cfg ) {
 
 // ============================================================================
 
+async function registerPod( podId, cfg ) {
+  try {
+    let appURL = cfg.LOWCODE_DB_API_URL +'/entity/'+ cfg.LOWCODE_DB_ROOTSCOPE + '/lowcode-integrator/0.1.0'
+    let dtaUrl = appURL + '/LcIntegratorService'
+    log.info( 'INIT POD', dtaUrl )
+
+    let podList = await axios.get( dtaUrl, HEADERS )
+    for ( let uid in podList.data ) {
+      if (  podList.data[ uid ].PodId == podId ) {
+        log.info( 'INIT POD: already registered', uid )
+        return uid
+      }
+    }
+
+    let podRec = { 
+      PodId  : podId,
+      Mode   : cfg.POD_MODE,
+      ApiUrl : cfg.POD_URL,
+      State  : 'Initialized'
+    }
+
+    let result = await axios.post( dtaUrl, podRec, HEADERS )
+    log.info( 'REGISTER POD', result.data )
+    return result.data.id
+
+  } catch ( exc ) {
+    log.warn( 'INIT POD', exc.message )
+    process.exit()
+  }
+}
+
+// ============================================================================
+
 const APP = {
   "scopeId": null,
   "title": "LowCode Async Integrator",
@@ -63,10 +97,16 @@ const APP = {
         "id": {
           "type": "UUID"
         },
-        "Role": {
+        "Mode": {
+          "type": "String"
+        },
+        "PodId": {
           "type": "String"
         },
         "ApiUrl": {
+          "type": "String"
+        },
+        "State": {
           "type": "String"
         }
       },

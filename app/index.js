@@ -16,28 +16,22 @@ exports: module.exports = {
   init
 }
 
-async function init( lowCodeConfig ) {
-  let cfg = checkConfig( lowCodeConfig )
+let id = '?'
 
-  db.initDB( cfg )
+async function init( podId, podConfig ) {
+  let cfg = checkConfig( podConfig )
+  cfg.ID = podId
+
+  await db.initDB( cfg )
+  cfg.POD_UID = await db.registerPod( cfg.ID, cfg )
 
   apiSec.init( cfg )
   let app = appGUI.init( cfg )
 
   await appGUI.initPages()
 
-  // await appMgrGUI.init()
   appSec.init( app, cfg )
-
-  // if ( cfg.OIDC_SERVER )  {
-  //  oidc.init( app, cfg.OIDC )
-  // }
-
   await appAPI.setupAPI( app, cfg.OIDC )
-  // await appAPI.setupAPI( app, cfg.OIDC )
-  // await appAdapter.setupAPI( app, cfg.OIDC )
-  // await appMgrAPI.setupAPI( app )
-  // await adminAPI.setupAPI( app, cfg )
 
   return app
 }

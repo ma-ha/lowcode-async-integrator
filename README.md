@@ -2,6 +2,11 @@
 
 Status: Development started
 
+## Plan: Integration Sources/Targets
+- RabbitMQ 
+- HTTP(S) API/WebHook
+- Azure Event Hub or Kafka
+
 # Getting Started
 
 ## Prepare "LowCode Data App"
@@ -28,3 +33,11 @@ Start the manager pod:
     npm install
     cd ../run
     node manager-pod.js | ../app/node_modules/bunyan/bin/bunyan
+
+## Prepare RabbitMQ
+
+see https://hub.docker.com/_/rabbitmq
+
+    docker run -d --hostname my-rabbit --name some-rabbit -e RABBITMQ_DEFAULT_USER=user -e RABBITMQ_DEFAULT_PASS=password -p 8080:15672 rabbitmq:3-management
+
+Open [http://localhost:8080](http://localhost:8080)
