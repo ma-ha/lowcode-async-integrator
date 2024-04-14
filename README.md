@@ -32,7 +32,22 @@ Start the manager pod:
     cd app
     npm install
     cd ../run
-    node manager-pod.js | ../app/node_modules/bunyan/bin/bunyan
+    node manager-pod | ../app/node_modules/bunyan/bin/bunyan
+
+Remark: If you now login into the "LowCode Data App" you should see the new "LowCode Async Integrator" app.
+
+# Start "Adapter Pod"
+
+Start an empty adapter pod:
+
+    cd adapter
+    npm install
+    cd ../run
+    node adapter-pod | ../app/node_modules/bunyan/bin/bunyan
+
+Now you have to configure input, processing and output for this new adaper in the manager. 
+
+TODO ...
 
 ## Prepare RabbitMQ
 
