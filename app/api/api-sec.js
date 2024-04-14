@@ -6,6 +6,7 @@ const jwtParser = require( 'jsonwebtoken' )
 exports: module.exports = { 
   init,
   adminAuthz,
+  clusterAuthz,
   apiAppAuthz,
   initJWTcheck
 }
@@ -35,6 +36,22 @@ function adminAuthz( theGUI ) {
       ))
     }
 
+    return next()
+  }
+  return check
+}
+
+// ----------------------------------------------------------------------------
+
+function clusterAuthz( cfg ) {
+  let check = async (req, res, next) => {
+    if ( req.headers.cluster_key != cfg.CLUSTER_KEY ) { 
+      log.warn( 'call is not authorized', req.headers )
+      return next( new UnauthorizedError(
+        'Not authorized', 
+        { message: 'Not authorized' }
+      ))
+    }
     return next()
   }
   return check

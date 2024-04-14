@@ -5,12 +5,8 @@ const pjson     = require( './package.json' )
 
 log.info( `Starting ${pjson.name} v${pjson.version} NODE_ENV=${process.env.NODE_ENV}` )
 
-const path      = require( 'path' )
-const db        = require( './db' )
-const appGUI    = require( './gui/gui' )
-const appSec    = require( './gui/app-sec' )
-const appAPI    = require( './api/api' )
-const apiSec    = require( './api/api-sec' )
+const manager   = require( './manager' )
+const appAPI    = require( './api' )
 
 exports: module.exports = {
   init
@@ -22,18 +18,9 @@ async function init( podId, podConfig ) {
   let cfg = checkConfig( podConfig )
   cfg.ID = podId
 
-  await db.initDB( cfg )
-  cfg.POD_UID = await db.registerPod( cfg.ID, cfg )
+  cfg.POD_UID = await manager.registerPod( cfg.ID, cfg )
 
-  apiSec.init( cfg )
-  let app = appGUI.init( cfg )
-
-  await appGUI.initPages()
-
-  appSec.init( app, cfg )
-  await appAPI.setupAPI( app, cfg )
-
-  return app
+  // await appAPI.setupAPI( cfg )
 }
 
 // ============================================================================
@@ -43,16 +30,14 @@ function checkConfig( cfg ) {
   if ( ! cfg ) {  cfg = {} } 
 
   checkCfgParam( cfg, 'POD_MODE', 'MANAGER' )
-  checkCfgParam( cfg, 'LOWCODE_DB_API_URL', 'http://localhost:8888/app/adapter/' )
-  checkCfgParam( cfg, 'LOWCODE_DB_API_ID', 'change-me' )
-  checkCfgParam( cfg, 'LOWCODE_DB_API_KEY', 'change-me' )
 
   checkCfgParam( cfg, 'CONFIG_DIR', '../pod-cfg/' )
   
   checkCfgParam( cfg, 'POD_URL_PATH', '/' )
   checkCfgParam( cfg, 'POD_PORT', 8889 )
-  checkCfgParam( cfg, 'POD_URL','http://localhost:' + cfg.POD_PORT + cfg.POD_URL_PATH )
-
+  checkCfgParam( cfg, 'POD_URL','http://localhost:' + cfg.POD_PORT + cfg.URL_PATH )
+  checkCfgParam( cfg, 'MANAGER_URL','http://localhost:8889/pod-mgr')
+  
   checkCfgParam( cfg, 'CLUSTER_KEY', 'secret' )
 
   checkOidcParams( cfg )

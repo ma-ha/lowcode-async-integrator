@@ -14,7 +14,7 @@ exports: module.exports = {
 // this should also only be available for authenticated users
 let gui = null
 
-async function setupAPI( app, oauthCfg ) {
+async function setupAPI( app, cfg ) {
   log.info( 'Starting API...' )
 
   let svc = app.getExpress()
@@ -25,9 +25,11 @@ async function setupAPI( app, oauthCfg ) {
 
   //---------------------------------------------------------------------------
   const apiAuthz = apiSec.apiAppAuthz( app )
+  const clusterAuthz = apiSec.clusterAuthz( cfg )
   
   svc.get(  '/pod/config', apiAuthz, getConfig )
   svc.post( '/pod/config', apiAuthz, setConfig )
+  svc.post( '/pod/register', clusterAuthz, registerPod )
 
   svc.post( '/pod/start', apiAuthz, startWorker )
   svc.post( '/pod/stop',  apiAuthz, stopWorker )
@@ -48,6 +50,14 @@ async function startWorker( req, res ) {
 
 async function stopWorker( req, res ) {
   log.info( 'stopWorker...')
+  // TODO implement
+  res.send({status: 'OK'})
+}
+
+// ----------------------------------------------------------------------------
+
+async function registerPod( req, res ) {
+  log.info( 'registerPod...', req.body )
   // TODO implement
   res.send({status: 'OK'})
 }

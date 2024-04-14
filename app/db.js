@@ -51,7 +51,7 @@ async function prepareDbApp( cfg ) {
 async function registerPod( podId, cfg ) {
   try {
     let appURL = cfg.LOWCODE_DB_API_URL +'/entity/'+ cfg.LOWCODE_DB_ROOTSCOPE + '/lowcode-integrator/0.1.0'
-    let dtaUrl = appURL + '/LcIntegratorService'
+    let dtaUrl = appURL + '/LCI-Service'
     log.info( 'INIT POD', dtaUrl )
 
     let podList = await axios.get( dtaUrl, HEADERS )
@@ -85,13 +85,13 @@ const APP = {
   "scopeId": null,
   "title": "LowCode Async Integrator",
   "enabled": true,
-  "require": {
-  },
+  "require": {},
   "entity": {
-    "LcIntegratorService": {
+    "LCI-Service": {
       "title": "Integrator Service",
       "scope": "inherit",
       "maintainer": [
+        "appUser"
       ],
       "properties": {
         "id": {
@@ -110,10 +110,114 @@ const APP = {
           "type": "String"
         }
       },
+      "noDelete": true,
+      "noEdit": true
+    },
+    "LCI-Adapter": {
+      "title": "Adapter",
+      "scope": "inherit",
+      "maintainer": [
+        "appUser"
+      ],
+      "properties": {
+        "id": {
+          "type": "UUID",
+          "noDelete": true,
+          "noEdit": true
+        },
+        "AdapterName": {
+          "label": "Adapter Name",
+          "type": "String",
+          "noEdit": true,
+          "noDelete": true
+        },
+        "PodId": {
+          "label": "Pod Id",
+          "type": "String",
+          "noEdit": true,
+          "noDelete": true
+        },
+        "DataInput": {
+          "type": "SelectRef",
+          "noEdit": true,
+          "noDelete": true,
+          "selectRef": "2095/lowcode-integrator/0.1.0/LCI-Resource",
+          "label": "Data Input"
+        },
+        "Code": {
+          "label": "Code",
+          "type": "Text",
+          "noEdit": true,
+          "noDelete": true,
+          "lines": 3
+        },
+        "DataOutput": {
+          "label": "Data Output",
+          "type": "SelectRef",
+          "noEdit": true,
+          "noDelete": true,
+          "selectRef": "2095/lowcode-integrator/0.1.0/LCI-Resource"
+        }
+      },
+      "noDelete": true,
+      "noEdit": true
+    },
+    "LCI-Resource": {
+      "title": "Resource",
+      "scope": "inherit",
+      "maintainer": [
+        "appUser"
+      ],
+      "properties": {
+        "id": {
+          "type": "UUID",
+          "noDelete": true,
+          "noEdit": true
+        },
+        "ResourceType": {
+          "label": "Resource Type",
+          "type": "Select",
+          "noEdit": true,
+          "noDelete": true,
+          "options": [
+            "RMQ-Queue",
+            "HTTP-API-Endpoint",
+            "AzureEventHub",
+            "Kafka"
+          ],
+          "colWidth": "S"
+        },
+        "Credentials": {
+          "label": "Credentials",
+          "type": "JSON",
+          "colWidth": "L",
+          "noEdit": true,
+          "noDelete": true
+        },
+        "Meta": {
+          "label": "Meta",
+          "type": "JSON",
+          "colWidth": "L",
+          "noEdit": true,
+          "noDelete": true
+        },
+        "URI": {
+          "label": "URI",
+          "type": "String",
+          "colWidth": "L",
+          "noEdit": true,
+          "noDelete": true
+        }
+      },
+      "noDelete": true,
       "noEdit": true
     }
   },
-  "startPage": "LcIntegratorService",
+  "startPage": [
+    "LCI-Service",
+    "LCI-Adapter",
+    "LCI-Resource"
+  ],
   "role": [
     "appUser"
   ],
