@@ -4,6 +4,8 @@ const log        = require( '../helper/log' ).logger
 const apiSec     = require( './api-sec' )
 const bodyParser = require( 'body-parser' )
 
+const db = require( '../db' )
+
 exports: module.exports = { 
   setupAPI  
 }
@@ -58,8 +60,11 @@ async function stopWorker( req, res ) {
 
 async function registerPod( req, res ) {
   log.info( 'registerPod...', req.body )
-  // TODO implement
-  res.send({status: 'OK'})
+  if ( ! req.body.podId ) { return res.status(400).send('podId missing') }
+
+  let uid = await db.registerPod( req.body.podId, 'ADAPTER', req.body.callbackURL )
+
+  res.send({status: 'OK', id: uid })
 }
 
 // ----------------------------------------------------------------------------

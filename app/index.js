@@ -23,7 +23,7 @@ async function init( podId, podConfig ) {
   cfg.ID = podId
 
   await db.initDB( cfg )
-  cfg.POD_UID = await db.registerPod( cfg.ID, cfg )
+  cfg.POD_UID = await db.registerPod( cfg.ID, cfg.POD_MODE, cfg.POD_URL )
 
   apiSec.init( cfg )
   let app = appGUI.init( cfg )
