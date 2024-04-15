@@ -5,7 +5,7 @@ const jwtParser = require( 'jsonwebtoken' )
 
 exports: module.exports = { 
   init,
-  adminAuthz,
+  guiAuthz,
   clusterAuthz,
   apiAppAuthz,
   initJWTcheck
@@ -20,9 +20,11 @@ function init( configs ) {
 }
 
 
-function adminAuthz( theGUI ) {
+function guiAuthz( theGUI ) {
   if ( ! gui ) { gui = theGUI }
   let check = async (req, res, next) => {
+    return next()
+
     let accessOk = false
     let userId = await gui.getUserIdFromReq( req )
 
@@ -67,13 +69,13 @@ function apiAppAuthz( theGUI ) {
     let appPw = req.headers[ 'app-secret' ]
     log.info( 'apiAppAuthz', appId, appPw )
    
-    if ( ! appScopes ) {
-      log.warn( 'call is not authorized', req.headers )
-      return next( new UnauthorizedError(
-        'Not authorized', 
-        { message: 'Not authorized' }
-      ))
-    }
+    // if ( ! appScopes ) {
+    //   log.warn( 'call is not authorized', req.headers )
+    //   return next( new UnauthorizedError(
+    //     'Not authorized', 
+    //     { message: 'Not authorized' }
+    //   ))
+    // }
     return next();
   }
   return check

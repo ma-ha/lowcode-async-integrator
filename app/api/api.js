@@ -28,6 +28,7 @@ async function setupAPI( app, cfg ) {
   //---------------------------------------------------------------------------
   const apiAuthz = apiSec.apiAppAuthz( app )
   const clusterAuthz = apiSec.clusterAuthz( cfg )
+  const guiAuthz = apiSec.guiAuthz( cfg   )
   
   svc.get(  '/pod/config', apiAuthz, getConfig )
   svc.post( '/pod/config', apiAuthz, setConfig )
@@ -37,6 +38,13 @@ async function setupAPI( app, cfg ) {
   svc.post( '/pod/stop',  apiAuthz, stopWorker )
 
   svc.get(  '/pod/stats', apiAuthz, getStats )
+
+  svc.get(  '/adapter', guiAuthz, getAdapter )
+  svc.get(  '/adapter/input/icons',  guiAuthz, getInputIcons )
+  svc.get(  '/adapter/output/icons', guiAuthz, getOutputIcons )
+
+  svc.get(  '/adapter/code', guiAuthz, getAdapterCode )
+  svc.post( '/adapter/code', apiAuthz, saveAdapterCode )
 
   // svc.delete('/adapter/entity/:scopeId/:entityId', apiAuthz, delCollection )
 }
@@ -89,6 +97,110 @@ async function getStats( req, res ) {
   res.send({status: 'OK'})
 }
 
+// ----------------------------------------------------------------------------
+
+async function getAdapter( req, res ) {
+  log.info( 'getAdapter...' )
+  let adapterMap = await db.getAdapter()
+  let adapterArray = []
+  for ( let uid in adapterMap ) {
+    let dbRec = adapterMap[ uid ]
+    let adapter = {
+      id     : uid,
+      State  : dbRec._state,
+      Name   : dbRec.AdapterName,
+      Input  : getResLnk( uid, dbRec.Input, 'Input' ),
+      Code   : '<a href="index.html?layout=EditCode-nonav&id='+uid+'">Edit Code</a>',
+      Output : getResLnk( uid, dbRec.Output, 'Output' ),
+      Action : getActionLnk( uid, dbRec._state )
+    }
+    adapterArray.push( adapter )
+  }
+  log.debug( 'getAdapter', adapterArray )
+  res.send( adapterArray )
+}
+
+function getResLnk( id, res, resType ) {
+  if ( ! res ) {
+    return  '<a href="index.html?layout=Select'+resType+'-nonav&id='+id+'">configure</a>'
+  } else {
+    return  '<a href="index.html?layout=Select'+resType+'-nonav&id='+id+'">'+res+'</a>'
+    
+  }
+}
+
+
+function getActionLnk( id, dbRec ) {
+  let lnk = ''
+  if ( ! dbRec.Output || ! dbRec.Input ) { return 'configuration required' }
+  switch ( dbRec._state ) {
+    case 'ConfigPending':
+      lnk = '<a href="">Start</a>'
+      break
+    case 'Started':
+      lnk = '<a href="">Stop</a>'
+      break
+    case 'Stopped':
+      lnk = '<a href="">Started</a>'
+      lnk += '<a href="">Reconfigure</a>'
+      break
+  
+    default: break
+  }
+  return lnk
+}
+
+// ----------------------------------------------------------------------------
+const IO_OPTS = [
+  { id: 'RMQQ', label: 'RabbitMQ<br>Queue', icon: 'img/k8s-ww-conn.png' },
+  { id: 'AzureEH', label: 'Azure<br>Event Hub', icon: 'img/k8s-ww-conn.png' },
+  { id: 'AzureSB', label: 'Azure<br>Service Bus Queue', icon: 'img/k8s-ww-conn.png' },
+  { id: 'HTTP', label: 'HTTP Endpoint', icon: 'img/k8s-ww-conn.png' },
+]
+const IN_OPTS = [
+  { id: 'RMQS', label: 'RabbitMQ<br>Subscription', icon: 'img/k8s-ww-conn.png' },
+]
+
+async function getInputIcons( req, res ) {
+  let adapterId = req.query.id
+  let icons = []
+  for ( let opt of IO_OPTS.concat( IN_OPTS ) ) {
+    icons.push({ 
+      id: opt.id, label: opt.label, img: opt.icon,
+      layout : 'ConfigureIO-nonav&id=input,'+ opt.id +','+ adapterId
+    })
+  }
+  icons.sort( ( a, b ) => { if ( a.label > b.label ) { return 1 } else { return -1} })
+  res.send({ icons: icons, update: 300 })
+}
+
+
+const OUT_OPTS = [
+  { id: 'RMQT', label: 'RabbitMQ<br>Topic', icon: 'img/k8s-ww-conn.png' },
+  { id: 'LCDB', label: 'Low Code DB', icon: 'img/k8s-ww-conn.png' },
+  { id: 'AzureBLOB', label: 'Azure<br>Storage BLOB', icon: 'img/k8s-ww-conn.png' },
+  { id: 'InfluxDB', label: 'InfluxDB', icon: 'img/k8s-ww-conn.png' },
+]
+
+async function getOutputIcons( req, res ) {
+  let adapterId = req.query.id
+  let icons = []
+  for ( let opt of IO_OPTS.concat( OUT_OPTS ) ) {
+    icons.push({ 
+      id: opt.id, label: opt.label, img: opt.icon,
+      layout : 'ConfigureIO-nonav&id=output,'+ opt.id +','+ adapterId
+    })
+  }
+  icons.sort( ( a, b ) => { if ( a.label > b.label ) { return 1 } else { return -1} })
+  res.send({ icons: icons, update: 300 })
+}
+
+// ----------------------------------------------------------------------------
+async function getAdapterCode( req, res ) {
+}
+
+async function saveAdapterCode( req, res ) {
+}
 // ----------------------------------------------------------------------------
 
 // async function delCollection( req, res )  {

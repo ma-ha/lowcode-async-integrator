@@ -5,7 +5,9 @@ const axios  = require( 'axios' )
 
 exports: module.exports = { 
   initDB,
-  registerPod
+  registerPod,
+  getAdapter,
+  saveAdapter
 }
 
 let HEADERS = null
@@ -98,6 +100,28 @@ async function registerPod( podId, podMode, podURL ) {
     log.warn( 'INIT POD', exc.message )
     if ( podMode == 'MANAGER' ) { process.exit() }
   }
+}
+
+
+// ============================================================================
+
+async function getAdapter( podId ) {
+  try {
+    if ( podId ) {
+
+    } else {
+      let adapterResult = await axios.get( ADAPTER_DB_URL, HEADERS )
+      return adapterResult.data
+    }
+
+  } catch ( exc ) {
+    log.warn( 'INIT POD', exc.message )
+    if ( podMode == 'MANAGER' ) { process.exit() }
+  }
+}
+
+async function saveAdapter( adapter ) {
+  // TODO
 }
 
 // ============================================================================

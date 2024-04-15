@@ -35,12 +35,6 @@ function init( appConfig ) {
   } else {
     gui.getExpress().use( '/img', express.static( __dirname + '/img' ) )
   }
-  
-  // gui.express.use( weblog() )
-
-  // gui.dynamicTitle( ( title, req, page ) => {
-  //   return dynamicTitle( title, req, page )
-  // })
 
   content.init( gui.getExpress(), cfg )
 
@@ -90,8 +84,168 @@ async function initPages( ) {
   // --------------------------------------------------------------------------
 
   // appGUI.init()
+  let appEntityPage = gui.addPage( 'Adapter' ) 
+  appEntityPage.title = "Adapter"
+  appEntityPage.setPageWidth( "90%")
+
+  appEntityPage.addView({  id: 'Adapter',
+    rowId: 'Adapter', title: 'Adapter',  height: '760px', 
+    type : 'pong-table', resourceURL: 'adapter',
+    moduleConfig : {
+      dataURL: "",
+      rowId: "id",
+      cols: [
+        { id: "State",   label: "State", width: "10%", cellType: "text" },
+        { id: "Name",    label: "Name",  width: "10%", cellType: "text" },
+        { id: "Input",   label: "Input", width: "10%", cellType: "text" },
+        { id: "Code",    label: "Code",  width: "10%", cellType: "text" },
+        { id: "Output",  label: "Output",width: "10%", cellType: "text" },
+        { id: "Action",  label: "Action", width: "10%", cellType: "text" }
+      ],
+      pollDataSec: "15",
+    }
+  })
+
+
+  let codeEditPage = gui.addPage( 'EditCode-nonav' ) 
+  codeEditPage.title = "Adapter Code"
+  codeEditPage.setPageWidth( "90%")  
+  codeEditPage.addView({
+    id: 'AdapterCodeEdit', rowId: 'AdapterCodeEdit',
+    title : 'Adapter Code', decor: "decor", height: '760px', 
+    type  : 'pong-form', resourceURL : 'adapter/code',
+    moduleConfig : {
+      label:'Adapter Code',
+      description: "Edit Adapter Code",
+      id: 'AdapterCodeEditForm',
+      fieldGroups:[{ columns: [{ formFields: [     
+        { id: "id",   label: "Id", type: "text", readonly: true },
+        { id: "code", label: "JS Code", type: "text", rows: 10 }
+      ] }] }],
+      actions : [ 
+        { id: "AdapterCodeSaveBtn", actionName: "Save", 
+          actionURL: 'code', target: "_parent" }
+      ]
+    }
+  })
+
+
+  let selInputPage = gui.addPage( 'SelectInput-nonav' ) 
+  selInputPage.title = "Adapter Input"
+  selInputPage.setPageWidth( "90%")
+  selInputPage.addView({ 
+    id:'SelectInputIcons', 
+    title: "Select Adapter Output Option",
+    type:'pong-icons', 
+    resourceURL:'adapter/input/icons', 
+    height:'760px' 
+  })
+
+
+  let selOutputPage = gui.addPage( 'SelectOutput-nonav' ) 
+  selOutputPage.title = "Adapter Output"
+  selOutputPage.setPageWidth( "90%")  
+  selOutputPage.addView({ 
+    id:'SelectInputIcons', 
+    title: "Select Adapter Input Option",
+    type:'pong-icons', 
+    resourceURL:'adapter/output/icons', 
+    height:'760px' 
+  })
+
+  let configIOPage = gui.addPage( 'ConfigureIO-nonav' ) 
+  configIOPage.title = "Adapter Configuration"
+  configIOPage.setPageWidth( "90%")  
+  configIOPage.dynamicRow( configureIoForm )
+
 }
 
+
+const ADAPTER_FORM = {
+  'RMQQ': { 
+    label: 'RabbitMQ Queue',
+    formFields : [
+      { id: "rmqURL",   label: "AMQP URL", type: "text" },
+      { id: "rmqQueue", label: "Queue Name", type: "text" },
+    ]
+  },
+  'RMQS': { 
+    label: 'RabbitMQ Subscription',
+    formFields : []
+  },
+  'RMQT': { 
+    label: 'RabbitMQ Topic',
+    formFields : []
+  },
+  'AzureEH': { 
+    label: 'Azure Event Hub',
+    formFields : []
+   },
+  'AzureSB': { 
+    label: 'Azure Service Bus Queue',
+    formFields : []
+   },
+  'HTTP': { 
+    label: 'HTTP Endpoint',
+    formFields : [
+      { id: "httpBaseURL",  label: "Base URL", type: "text" }
+    ]
+   },
+  'LCDB': { 
+    label: 'Low Code DB',
+    formFields : []
+   },
+  'AzureBLOB': { 
+    label: 'Azure Storage BLOB',
+    formFields : []
+   },
+  'InfluxDB': { 
+    label: 'InfluxDB',
+    formFields : []
+   },
+}
+
+async function configureIoForm( staticRows, req, pageName )  {
+  if ( ! req.query.id || req.query.id.split(',').length != 3 ) { 
+    log.warn('require param: id') 
+    return [] 
+  }
+
+  let ioDir = req.query.id.split(',')[0]
+  let ioOpt = req.query.id.split(',')[1]
+  let adapterId = req.query.id.split(',')[2]
+
+  let formCfg = ADAPTER_FORM[ ioOpt ]
+
+  let lbl = ( ioDir == 'input' ? 'Input' : 'Output' )
+
+  let rowArr = [] 
+
+  let formFields =  [
+    { id: "id",   label: "Adapter Id", type: "text", value: adapterId, readonly: true },
+    { id: "adapter", type: "text", value: ioOpt, hidden: true }
+  ].concat(
+    formCfg.formFields
+  )
+  
+
+  rowArr.push({
+    id: 'AdapterIoConfig', rowId: 'AdapterIoConfig',
+    title : 'Adapter '+lbl, decor: "decor", height: '760px', 
+    type  : 'pong-form', resourceURL : 'adapter/'+ioDir,
+    moduleConfig : {
+      label: formCfg.label,
+      id: 'AdapterIoConfigForm',
+      fieldGroups:[{ columns: [{ formFields: formFields }] }],
+      actions : [ 
+        { id: "AdapterIoConfigSaveBtn", actionName: "Save", 
+          actionURL: 'adapter/'+ioDir, target: "_parent" }
+      ]
+    }
+  })
+
+  return rowArr
+}
 // ==========================================================================++
  
 function genDynNav ( navType, oldNavTabs, req ) {
@@ -164,47 +318,6 @@ async function genPageHeader ( pgHeader, req, page ) {
         modules: []
       }
     }
-
-    // let user = await userDta.getUserInfoFromReq( gui, req )
-    // // log.info( 'genPageHeader', user )
-    // if ( user ) { 
-    //   pgHeader.logo = { text: '<a href="index.html">'+await userDta.getScopeName( user.rootScopeId ) +'</a>' }
-
-    //   if ( user.rootScopeId != user.scopeId ) {
-    //     pgHeader.logo.text += '<br/><span class="header-logo-tenant">'+ await userDta.getScopeName( user.scopeId ) + '</span>'
-    //   }
-    
-    //   let scopeTbl = await userDta.getScopeList( user.userId )
-    //   let menuItems = []
-    //   for ( let scope in scopeTbl ) {
-    //     let ident = ''
-    //     let deepth = (scope.match(/\//g) || []).length
-    //     for ( let i = 0; i < deepth; i++ ) { ident += '&nbsp;&nbsp;'} 
-    //     if ( page == 'AppEntity-nonav' ) {
-    //       if ( req.query.id ) {
-    //         page += '&app='+ req.query.id
-    //       }
-    //     }
-    //     menuItems.push({ html: ident + '<a href="setscope?id='+scope+'&layout='+page+'">'+scopeTbl[ scope ].name+'</a>', id: scope })
-    //   }
-
-    //   menuItems.sort( ( a, b ) => {
-    //     if ( a.id > b.id ) { return 1 }
-    //     return -1
-    //   })
-
-    //   let actScope = await userDta.getSelScopeName( user.userId )
-    //   pgHeader.modules.push({ 
-    //     id    : "ScopeSel", 
-    //     type  : "pong-pulldown", 
-    //     moduleConfig : {
-    //       title: 'Scope: '+actScope,
-    //       menuItems : menuItems
-    //     }
-    //   })
-    // }
-    // log.info( pgHeader )
-    // resolve( pgHeader )
     return pgHeader
 }
 

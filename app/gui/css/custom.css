@@ -473,6 +473,12 @@ width: 190px;
   width: 180px;
   height: 138px;
 }
+.pongIcon {
+  text-align: center;
+  width: 200px;
+  float: left;
+}
+
 #AppsContent .pongIconImg {
   height: 115px;
 }
