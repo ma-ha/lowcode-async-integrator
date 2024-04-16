@@ -4,7 +4,8 @@ const log        = require( '../helper/log' ).logger
 const apiSec     = require( './api-sec' )
 const bodyParser = require( 'body-parser' )
 
-const db = require( '../db' )
+const db         = require( '../db' )
+const adapters   = require( '../adapters' )
 
 exports: module.exports = { 
   setupAPI  
@@ -151,47 +152,18 @@ function getActionLnk( id, dbRec ) {
 }
 
 // ----------------------------------------------------------------------------
-const IO_OPTS = [
-  { id: 'RMQQ', label: 'RabbitMQ<br>Queue', icon: 'img/k8s-ww-conn.png' },
-  { id: 'AzureEH', label: 'Azure<br>Event Hub', icon: 'img/k8s-ww-conn.png' },
-  { id: 'AzureSB', label: 'Azure<br>Service Bus Queue', icon: 'img/k8s-ww-conn.png' },
-  { id: 'HTTP', label: 'HTTP Endpoint', icon: 'img/k8s-ww-conn.png' },
-]
-const IN_OPTS = [
-  { id: 'RMQS', label: 'RabbitMQ<br>Subscription', icon: 'img/k8s-ww-conn.png' },
-]
+
 
 async function getInputIcons( req, res ) {
   let adapterId = req.query.id
-  let icons = []
-  for ( let opt of IO_OPTS.concat( IN_OPTS ) ) {
-    icons.push({ 
-      id: opt.id, label: opt.label, img: opt.icon,
-      layout : 'ConfigureIO-nonav&id=input,'+ opt.id +','+ adapterId
-    })
-  }
-  icons.sort( ( a, b ) => { if ( a.label > b.label ) { return 1 } else { return -1} })
+  let icons = adapters.getInIcons( adapterId ) 
   res.send({ icons: icons, update: 300 })
 }
 
 
-const OUT_OPTS = [
-  { id: 'RMQT', label: 'RabbitMQ<br>Topic', icon: 'img/k8s-ww-conn.png' },
-  { id: 'LCDB', label: 'Low Code DB', icon: 'img/k8s-ww-conn.png' },
-  { id: 'AzureBLOB', label: 'Azure<br>Storage BLOB', icon: 'img/k8s-ww-conn.png' },
-  { id: 'InfluxDB', label: 'InfluxDB', icon: 'img/k8s-ww-conn.png' },
-]
-
 async function getOutputIcons( req, res ) {
   let adapterId = req.query.id
-  let icons = []
-  for ( let opt of IO_OPTS.concat( OUT_OPTS ) ) {
-    icons.push({ 
-      id: opt.id, label: opt.label, img: opt.icon,
-      layout : 'ConfigureIO-nonav&id=output,'+ opt.id +','+ adapterId
-    })
-  }
-  icons.sort( ( a, b ) => { if ( a.label > b.label ) { return 1 } else { return -1} })
+  let icons = adapters.getOutIcons( adapterId ) 
   res.send({ icons: icons, update: 300 })
 }
 

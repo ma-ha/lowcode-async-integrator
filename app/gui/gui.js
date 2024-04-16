@@ -6,7 +6,8 @@ const log     = require( '../helper/log' ).logger
 const pjson   = require( '../package.json' )
 // const weblog  = require( './weblog' ) 
 
-const content = require( './api-content' ) 
+const content  = require( './api-content' ) 
+const adapters = require( '../adapters' )
 
 exports: module.exports = {
   init,
@@ -161,50 +162,6 @@ async function initPages( ) {
 }
 
 
-const ADAPTER_FORM = {
-  'RMQQ': { 
-    label: 'RabbitMQ Queue',
-    formFields : [
-      { id: "rmqURL",   label: "AMQP URL", type: "text" },
-      { id: "rmqQueue", label: "Queue Name", type: "text" },
-    ]
-  },
-  'RMQS': { 
-    label: 'RabbitMQ Subscription',
-    formFields : []
-  },
-  'RMQT': { 
-    label: 'RabbitMQ Topic',
-    formFields : []
-  },
-  'AzureEH': { 
-    label: 'Azure Event Hub',
-    formFields : []
-   },
-  'AzureSB': { 
-    label: 'Azure Service Bus Queue',
-    formFields : []
-   },
-  'HTTP': { 
-    label: 'HTTP Endpoint',
-    formFields : [
-      { id: "httpBaseURL",  label: "Base URL", type: "text" }
-    ]
-   },
-  'LCDB': { 
-    label: 'Low Code DB',
-    formFields : []
-   },
-  'AzureBLOB': { 
-    label: 'Azure Storage BLOB',
-    formFields : []
-   },
-  'InfluxDB': { 
-    label: 'InfluxDB',
-    formFields : []
-   },
-}
-
 async function configureIoForm( staticRows, req, pageName )  {
   if ( ! req.query.id || req.query.id.split(',').length != 3 ) { 
     log.warn('require param: id') 
@@ -215,7 +172,8 @@ async function configureIoForm( staticRows, req, pageName )  {
   let ioOpt = req.query.id.split(',')[1]
   let adapterId = req.query.id.split(',')[2]
 
-  let formCfg = ADAPTER_FORM[ ioOpt ]
+  let formCfg = adapters.getFormCfg( ioOpt )
+  if ( ! formCfg ) { return [] }
 
   let lbl = ( ioDir == 'input' ? 'Input' : 'Output' )
 
