@@ -105,9 +105,11 @@ async function registerPod( podId, podMode, podURL ) {
 
 // ============================================================================
 
-async function getAdapter( podId ) {
+async function getAdapter( adapterId ) {
   try {
-    if ( podId ) {
+    if ( adapterId ) {
+      let adapterResult = await axios.get( ADAPTER_DB_URL+'/'+adapterId, HEADERS )
+      return adapterResult.data
 
     } else {
       let adapterResult = await axios.get( ADAPTER_DB_URL, HEADERS )
@@ -121,7 +123,9 @@ async function getAdapter( podId ) {
 }
 
 async function saveAdapter( adapter ) {
-  // TODO
+  let adapterResult = await axios.put( ADAPTER_DB_URL+'/'+adapter.id, adapter, HEADERS )
+  log.info( 'saveAdapter', adapterResult )
+  return adapterResult
 }
 
 // ============================================================================
@@ -188,15 +192,34 @@ const APP = {
             "null_Register": true
           }
         },
+        "DataInputType": {
+          "label": "Data Input",
+          "type": "String",
+          "noEdit": true,
+          "noDelete": true,
+          "stateTransition": {
+            "ConfigPending_Configure": true
+          }
+        },
+        "DataOutputName": {
+          "label": "Data Output Name",
+          "type": "String",
+          "noEdit": true,
+          "noDelete": true,
+          "stateTransition": {
+            "ConfigPending_Configure": true
+          }
+        },
         "DataInput": {
-          "type": "SelectRef",
+          "type": "JSON",
           "noEdit": true,
           "noDelete": true,
           "selectRef": "2095/lowcode-integrator/0.1.0/LCI-Resource",
           "label": "Data Input",
           "stateTransition": {
             "ConfigPending_Configure": true
-          }
+          },
+          "noTable": true
         },
         "Code": {
           "label": "Code",
@@ -208,15 +231,34 @@ const APP = {
             "ConfigPending_Configure": true
           }
         },
+        "DataOutputType": {
+          "label": "Data Output",
+          "type": "String",
+          "noEdit": true,
+          "noDelete": true,
+          "stateTransition": {
+            "ConfigPending_Configure": true
+          }
+        },
+        "DataInputName": {
+          "label": "Data Input Name",
+          "type": "String",
+          "noEdit": true,
+          "noDelete": true,
+          "stateTransition": {
+            "ConfigPending_Configure": true
+          }
+        },
         "DataOutput": {
           "label": "Data Output",
-          "type": "SelectRef",
+          "type": "JSON",
           "noEdit": true,
           "noDelete": true,
           "selectRef": "2095/lowcode-integrator/0.1.0/LCI-Resource",
           "stateTransition": {
             "ConfigPending_Configure": true
-          }
+          },
+          "noTable": true
         }
       },
       "noDelete": true,

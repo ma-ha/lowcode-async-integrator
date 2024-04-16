@@ -8,6 +8,7 @@ const pjson   = require( '../package.json' )
 
 const content  = require( './api-content' ) 
 const adapters = require( '../adapters' )
+const db       = require( '../db' )
 
 exports: module.exports = {
   init,
@@ -111,24 +112,54 @@ async function initPages( ) {
   let codeEditPage = gui.addPage( 'EditCode-nonav' ) 
   codeEditPage.title = "Adapter Code"
   codeEditPage.setPageWidth( "90%")  
-  codeEditPage.addView({
-    id: 'AdapterCodeEdit', rowId: 'AdapterCodeEdit',
-    title : 'Adapter Code', decor: "decor", height: '760px', 
-    type  : 'pong-form', resourceURL : 'adapter/code',
-    moduleConfig : {
-      label:'Adapter Code',
-      description: "Edit Adapter Code",
-      id: 'AdapterCodeEditForm',
-      fieldGroups:[{ columns: [{ formFields: [     
-        { id: "id",   label: "Id", type: "text", readonly: true },
-        { id: "code", label: "JS Code", type: "text", rows: 10 }
-      ] }] }],
-      actions : [ 
-        { id: "AdapterCodeSaveBtn", actionName: "Save", 
-          actionURL: 'code', target: "_parent" }
-      ]
+  codeEditPage.dynamicRow( configurCodeForm )
+
+
+  async function configurCodeForm( staticRows, req, pageName )  {
+    if ( ! req.query.id ) { 
+      log.warn('require param: id') 
+      return [] 
     }
-  })
+    let dbAdapter = await db.getAdapter(  req.query.id )
+    if ( ! dbAdapter ) { 
+      log.warn( 'adapter not found',  req.query.id ) 
+      return [] 
+    }
+    inSig  = adapters.getInSign( dbAdapter.DataInputType )
+    outSig = adapters.getOutSign( dbAdapter.DataOutputType )
+
+    let rowArr = [] 
+    rowArr.push({
+      id: 'AdapterCodeEdit', rowId: 'AdapterCodeEdit',
+      title : 'Adapter Code', decor: "decor", height: '760px', 
+      type  : 'pong-form', resourceURL : 'adapter/code',
+      moduleConfig : {
+        label:'Adapter Code',
+        description: "Edit Adapter Code",
+        id: 'AdapterCodeEditForm',
+        fieldGroups:[{ columns: [
+          { formFields: [     
+            { id: "id", label: "Adapter Id", type: "text", value: dbAdapter.id, readonly: true },
+            { id: "in", label: "Input", type: "text", value: dbAdapter.DataInputType +': '+ dbAdapter.DataInputName, readonly: true },
+            { id: "out", label: "Output", type: "text", value: dbAdapter.DataOutputType +': '+ dbAdapter.DataOutputName, readonly: true }
+          ]},
+          { fieldset:"JS Code", 
+            formFields: [     
+              { id: "codePre1", label: '<pre>async ( '+inSig+' ) => {</pre>', type: "label" },
+              { id: "code", description: "JS Code", type: "text", rows: 10, defaultVal: ( dbAdapter.Code ? dbAdapter.Code : '' ) },
+              { id: "codePost1", label: '<pre>  '+outSig+'</pre>', type: "label" },
+              { id: "codePostX", label: "<pre>}</pre>", type: "label" },
+            ]
+          }
+        ] }],
+        actions : [ 
+          { id: "AdapterCodeSaveBtn", actionName: "Save", 
+            actionURL: 'adapter/code', target: "modal" }
+        ]
+      }
+    })
+    return rowArr
+  }
 
 
   let selInputPage = gui.addPage( 'SelectInput-nonav' ) 
@@ -172,16 +203,40 @@ async function configureIoForm( staticRows, req, pageName )  {
   let ioOpt = req.query.id.split(',')[1]
   let adapterId = req.query.id.split(',')[2]
 
-  let formCfg = adapters.getFormCfg( ioOpt )
-  if ( ! formCfg ) { return [] }
+  let dbAdapter = await db.getAdapter( adapterId )
+  if ( ! dbAdapter ) { return [] }
+  log.info( 'dbAdapter', dbAdapter)
 
-  let lbl = ( ioDir == 'input' ? 'Input' : 'Output' )
+  let lbl = ''
+  let adapterName = ''
+  let adapterCfgJSON = {}
+  if ( ioDir == 'Input' ) {
+    lbl = 'Input'
+    if ( dbAdapter.DataInputName ) {
+      adapterName = dbAdapter.DataInputName
+    }
+    if ( dbAdapter.DataInput ) {
+      adapterCfgJSON = dbAdapter.DataInput
+    }
+  } else {
+    lbl = 'Output' 
+    if ( dbAdapter.DataOutputName ) {
+      adapterName = dbAdapter.DataOutputName
+    }
+     if ( dbAdapter.DataOutput ) {
+      adapterCfgJSON = dbAdapter.DataOutput
+    }
+  }
+
+   let formCfg = adapters.getFormCfg( ioOpt, adapterCfgJSON )
+  if ( ! formCfg ) { return [] }
 
   let rowArr = [] 
 
   let formFields =  [
     { id: "id",   label: "Adapter Id", type: "text", value: adapterId, readonly: true },
-    { id: "adapter", type: "text", value: ioOpt, hidden: true }
+    { id: "adapterType", type: "text", value: ioOpt, hidden: true },
+    { id: "adapterName",  label: "Adapter Name", defaultVal: adapterName, type: "text" }
   ].concat(
     formCfg.formFields
   )
@@ -197,7 +252,10 @@ async function configureIoForm( staticRows, req, pageName )  {
       fieldGroups:[{ columns: [{ formFields: formFields }] }],
       actions : [ 
         { id: "AdapterIoConfigSaveBtn", actionName: "Save", 
-          actionURL: 'adapter/'+ioDir, target: "_parent" }
+          actionURL: 'adapter/'+ioDir, target: "modal" },
+        { id: "AdapterIoConfigChange", link: 'Change Type', 
+          target: '_parent',
+          linkURL: 'index.html?layout=Select'+ioDir+'-nonav&id='+adapterId }
       ]
     }
   })

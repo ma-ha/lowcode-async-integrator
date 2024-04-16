@@ -43,6 +43,8 @@ async function setupAPI( app, cfg ) {
   svc.get(  '/adapter', guiAuthz, getAdapter )
   svc.get(  '/adapter/input/icons',  guiAuthz, getInputIcons )
   svc.get(  '/adapter/output/icons', guiAuthz, getOutputIcons )
+  svc.post( '/adapter/input', apiAuthz, setAdapterInput )
+  svc.post( '/adapter/output', apiAuthz, setAdapterOutput )
 
   svc.get(  '/adapter/code', guiAuthz, getAdapterCode )
   svc.post( '/adapter/code', apiAuthz, saveAdapterCode )
@@ -110,9 +112,9 @@ async function getAdapter( req, res ) {
       id     : uid,
       State  : dbRec._state,
       Name   : dbRec.AdapterName,
-      Input  : getResLnk( uid, dbRec.Input, 'Input' ),
+      Input  : getResLnk( uid, dbRec, 'Input' ),
       Code   : '<a href="index.html?layout=EditCode-nonav&id='+uid+'">Edit Code</a>',
-      Output : getResLnk( uid, dbRec.Output, 'Output' ),
+      Output : getResLnk( uid, dbRec, 'Output' ),
       Action : getActionLnk( uid, dbRec._state )
     }
     adapterArray.push( adapter )
@@ -121,11 +123,13 @@ async function getAdapter( req, res ) {
   res.send( adapterArray )
 }
 
-function getResLnk( id, res, resType ) {
-  if ( ! res ) {
-    return  '<a href="index.html?layout=Select'+resType+'-nonav&id='+id+'">configure</a>'
+function getResLnk( id, rec, resDir ) {
+  let resName = rec[ 'Data'+resDir+'Name' ]
+  let resType = rec[ 'Data'+resDir+'Type' ]
+  if ( ! resName ) {
+    return  '<a href="index.html?layout=Select'+resDir+'-nonav&id='+id+'">configure</a>'
   } else {
-    return  '<a href="index.html?layout=Select'+resType+'-nonav&id='+id+'">'+res+'</a>'
+    return  resType+': <a href="index.html?layout=ConfigureIO-nonav&id='+resDir+','+resType+','+id+'">'+resName+'</a>'
     
   }
 }
@@ -167,12 +171,68 @@ async function getOutputIcons( req, res ) {
   res.send({ icons: icons, update: 300 })
 }
 
-// ----------------------------------------------------------------------------
-async function getAdapterCode( req, res ) {
+
+async function setAdapterInput( req, res ) {
+  if ( ! req.body.id || ! req.body.adapterType || ! req.body.adapterName ) {
+    return res.status(400).send('Parameter missing')
+  }
+  let adapter = await db.getAdapter(  req.body.id )
+  if ( ! adapter ) { return res.status(400).send('Adapter not found') }
+  if ( ! adapter._state == 'ConfigPending' ) { 
+    return res.status(400).send('Adapter config not allowe in state: '+adapter._state  ) 
+  }
+
+  adapter.DataInputType = req.body.adapterType
+  adapter.DataInputName = req.body.adapterName
+  adapter.DataInput = {}
+  for ( let p in req.body ) {
+    if ( p == 'id' || p == 'adapterName' || p == 'adapterType' ) { continue }
+    adapter.DataInput[ p ] = req.body[ p ]
+  }
+  await db.saveAdapter( adapter )
+  res.send('OK')
 }
 
-async function saveAdapterCode( req, res ) {
+
+async function setAdapterOutput( req, res ) {
+  if ( ! req.body.id || ! req.body.adapterType || ! req.body.adapterName ) {
+    return res.status(400).send('Parameter missing')
+  }
+  let adapter = await db.getAdapter(  req.body.id )
+  if ( ! adapter ) { return res.status(400).send('Adapter not found') }
+  if ( ! adapter._state == 'ConfigPending' ) { 
+    return res.status(400).send('Adapter config not allowe in state: '+adapter._state  ) 
+  }
+  
+  adapter.DataOutputType = req.body.adapterType
+  adapter.DataOutputName = req.body.adapterName
+  adapter.DataOutput = {}
+  for ( let p in req.body ) {
+    if ( p == 'id' || p == 'adapterName' || p == 'adapterType' ) { continue }
+    adapter.DataOutput[ p ] = req.body[ p ]
+  }
+  await db.saveAdapter( adapter )
+  res.send('OK')
 }
+
+// ----------------------------------------------------------------------------
+async function getAdapterCode( req, res ) {
+  // TODO
+}
+// ----------------------------------------------------------------------------
+
+async function saveAdapterCode( req, res ) {
+  log.info( 'saveAdapterCode', req.body )
+  if ( ! req.body.id || ! req.body.code ) {
+    return res.status(400).send('Parameter missing')
+  }
+  let adapter = await db.getAdapter(  req.body.id )
+  if ( ! adapter ) { return res.status(400).send('Adapter not found') }
+  adapter.Code = req.body.code
+  await db.saveAdapter( adapter )
+  res.send( 'OK' )
+}
+
 // ----------------------------------------------------------------------------
 
 // async function delCollection( req, res )  {

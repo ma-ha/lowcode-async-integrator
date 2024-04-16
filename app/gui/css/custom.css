@@ -6,14 +6,14 @@
   --header-bg-color: #222222;
   --footer-bg-color: #222222;
   --footer-color: #d5d5d5;
-  --theme-color: #01699b;
+  --theme-color: #21BBBB;;
   --menu-bg-color: #444444;
-  --menu-bg-active-color: #01699b;
-  --menu-bg-hover-color: #81c3e8;
+  --menu-bg-active-color: #2a5d5d;
+  --menu-bg-hover-color: #68d9d9;
   --menu-color: #ffffff;
   --link-color: #444444;
   --link-active-color: #000000;
-  --content-h-bg-color: #81c3e8;
+  --content-h-bg-color: #7ebcbc;
 }
 /* ------ BEGIN COLOR SCHEME --------*/
 html {
@@ -218,6 +218,7 @@ top: 90px;
   font-size: 0.8em;
 }
 
+#header,
 .header-logo  a,
 .header-logo  a:link,
 .header-logo  a:visited {
@@ -669,7 +670,7 @@ margin-top: 20px;
   padding-top: 30px;
   padding-bottom: 10px;
   height: 130px;
-  background-color: #4ca5d0;
+  background-color: var(--menu-bg-active-color);
   background-image: url("../img/bg-w1.png");
   background-size: 100%;
 }
@@ -714,7 +715,7 @@ margin-top: 20px;
   width: 23.8%;
   min-height: 300px;
   height: auto;
-  background-color: #2ca7ee15;
+  background-color: #ddf1f1;
   float: left;
   margin-right: 1%;
 }
@@ -878,4 +879,24 @@ code {
 
 .markdownNav {
   display: none;
+}
+
+
+#AdapterIoConfig .pongFormField {
+  padding-top: 5px;
+}
+
+#AdapterIoConfig .pongFormField {
+  padding-bottom: 5px;
+}
+
+#AdapterCodeEditContentcodeDiv {
+  margin-left: 20px;
+}
+#AdapterCodeEditContentcode {
+  width: 1000px;
+  height: 400px;
+}
+#AdapterCodeEdit pre {
+  font-size: 14px;
 }
