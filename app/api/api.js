@@ -41,6 +41,7 @@ async function setupAPI( app, cfg ) {
   svc.get(  '/pod/stats', apiAuthz, getStats )
 
   svc.get(  '/adapter', guiAuthz, getAdapter )
+  svc.post( '/adapter', guiAuthz, addAdapter )
   svc.get(  '/adapter/input/icons',  guiAuthz, getInputIcons )
   svc.get(  '/adapter/output/icons', guiAuthz, getOutputIcons )
   svc.post( '/adapter/input', apiAuthz, setAdapterInput )
@@ -48,6 +49,7 @@ async function setupAPI( app, cfg ) {
 
   svc.get(  '/adapter/code', guiAuthz, getAdapterCode )
   svc.post( '/adapter/code', apiAuthz, saveAdapterCode )
+  svc.get(  '/service/options', guiAuthz, getServiceOptions )
 
   // svc.delete('/adapter/entity/:scopeId/:entityId', apiAuthz, delCollection )
 }
@@ -85,6 +87,28 @@ async function registerPod( req, res ) {
   res.send({status: 'OK', id: uid })
 }
 
+async function getServiceOptions( req, res ) {
+  log.info( 'getServiceOptions...', req.body )
+  let scvMap = await db.getServices()
+  let svcIdArr = []
+  for ( let svcId in scvMap ) {
+    let svc = scvMap[ svcId ]
+    if ( svc.Mode == 'ADAPTER' && ! svcIdArr.includes( svcId ) ) {
+      svcIdArr.push( svcId )
+    }
+  }
+  let options = []
+  for ( let svcId of svcIdArr ) {
+    options.push({
+      id : svcId, 
+      svcName : scvMap[ svcId ].ServiceId
+    })
+  }
+  log.info( 'options', options )
+  res.send( options )
+}
+
+
 // ----------------------------------------------------------------------------
 
 async function setConfig( req, res ) {
@@ -109,15 +133,43 @@ async function getStats( req, res ) {
 
 // ----------------------------------------------------------------------------
 
+async function addAdapter( req, res ) {
+  log.info( 'addAdapter...' )
+  let addResult = await db.addAdapter( req.body.ServiceId, req.body.Name )
+  if ( addResult.error ) {
+    res.send( 'ERROR: '+addResult.error  )
+  } else {
+    res.send( 'Created '+ addResult.id )
+  }
+}
+
+// ----------------------------------------------------------------------------
+
 async function getAdapter( req, res ) {
-  log.info( 'getAdapter...' )
-  let adapterMap = await db.getAdapter()
+  log.debug( 'getAdapter...', req.query )
+  let filter = null
+  if ( req.query.dataFilter ) {
+    if ( req.query.dataFilter.ServiceName && req.query.dataFilter.ServiceName != '' ) {
+      if ( ! filter ) { filter = {} }
+      filter.ServiceName = req.query.dataFilter.ServiceName 
+    }
+    if ( req.query.dataFilter.DataInputType && req.query.dataFilter.DataInputType != '' ) {
+      if ( ! filter ) { filter = {} }
+      filter.DataInputType = req.query.dataFilter.DataInputType 
+    }
+    if ( req.query.dataFilter.DataInputType && req.query.dataFilter.DataOutputType != '' ) {
+      if ( ! filter ) { filter = {} }
+      filter.DataOutputType = req.query.dataFilter.DataOutputType 
+    }
+  }
+  let adapterMap = await db.getAdapter( null, filter )
   let adapterArray = []
   for ( let uid in adapterMap ) {
     let dbRec = adapterMap[ uid ]
     let adapter = {
       id     : uid,
       State  : dbRec._state,
+      Service: dbRec.ServiceName,
       Name   : dbRec.AdapterName,
       Input  : getResLnk( uid, dbRec, 'Input' ),
       Code   : '<a href="index.html?layout=EditCode-nonav&id='+uid+'">Edit Code</a>',
@@ -139,6 +191,21 @@ function getResLnk( id, rec, resDir ) {
     return  resType+': <a href="index.html?layout=ConfigureIO-nonav&id='+resDir+','+resType+','+id+'">'+resName+'</a>'
     
   }
+}
+
+
+function extractFilter( filterQuery ){
+  let filter = null
+  if ( filterQuery ) {
+    for (  let fp in filterQuery ) { try {
+      let query = filterQuery[ fp ].replaceAll( '%20', ' ' ).trim()
+      if ( query != '' ) {
+        if ( ! filter ) { filter = {} }
+        filter[ fp ] = query
+      }
+    } catch ( exc ) { log.warn( 'extractFilter', exc ) }}
+  }
+  return filter
 }
 
 

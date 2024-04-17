@@ -91,13 +91,22 @@ async function initPages( ) {
   appEntityPage.setPageWidth( "90%")
 
   appEntityPage.addView({  id: 'Adapter',
-    rowId: 'Adapter', title: 'Adapter',  height: '760px', 
+    rowId: 'Adapter', title: 'Adapter',  height: '650px', 
     type : 'pong-table', resourceURL: 'adapter',
     moduleConfig : {
       dataURL: "",
       rowId: "id",
+      filter: {
+        dataReqParams: [
+          { id: 'ServiceName', label: 'Service' },
+          { id: 'DataInputType', label: 'Input Type' },
+          { id: 'DataOutputType', label: 'Output Type' }
+        ],
+        dataReqParamsSrc : 'Form'
+      },
       cols: [
         { id: "State",   label: "State", width: "10%", cellType: "text" },
+        { id: "Service", label: "Service", width: "10%", cellType: "text" },
         { id: "Name",    label: "Name",  width: "10%", cellType: "text" },
         { id: "Input",   label: "Input", width: "10%", cellType: "text" },
         { id: "Code",    label: "Code",  width: "10%", cellType: "text" },
@@ -108,6 +117,25 @@ async function initPages( ) {
     }
   })
 
+  appEntityPage.addView({ id: 'AddAdapter', 
+    title: 'Add Adapter',  height: '120px', 
+    type : 'pong-form', resourceURL: 'adapter',
+    moduleConfig : {
+      id: 'AddAdaprerForm',
+      fieldGroups:[{ columns: [
+        { formFields: [{ id: "Name",label: "Name", type: "text" } ]},
+        { formFields: [{ id: "ServiceId",  label: "Hosted on Service", type: "select", 
+          optionsResource: { resourceURL: "service/options", optionField:"svcName", optionValue:"id" } }]},
+      ] }],
+      actions : [ 
+        { id: "AddAdapterBtn", actionName: "Add", 
+          update: [{ resId:'Adapter' }], 
+          actionURL: 'adapter', target: "modal" }
+      ]
+    }
+  })
+
+  // --------------------------------------------------------------------------
 
   let codeEditPage = gui.addPage( 'EditCode-nonav' ) 
   codeEditPage.title = "Adapter Code"

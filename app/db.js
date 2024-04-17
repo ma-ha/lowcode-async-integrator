@@ -6,6 +6,8 @@ const axios  = require( 'axios' )
 exports: module.exports = { 
   initDB,
   registerPod,
+  getServices,
+  addAdapter,
   getAdapter,
   saveAdapter
 }
@@ -113,10 +115,47 @@ async function registerPod( serviceId, mode, callbackURL, workerId ) {
   }
 }
 
+// ----------------------------------------------------------------------------
+
+async function addAdapter( serviceId, adapterName ) {
+  try {
+    let registerURL =  ADAPTER_DB_URL+'/state/null/Register'
+    log.info( 'ADD ADAPTER', registerURL )
+    let service = await axios.get( SVC_DB_URL +'/'+ serviceId, HEADERS )
+    if ( ! service ) { return { error: 'Service not found'} }
+    let adapterMap = await axios.get( ADAPTER_DB_URL, HEADERS )
+    for ( let adapterId in adapterMap.data ) {
+      let a = adapterMap.data[ adapterId ]
+      if ( a.AdapterName == adapterName  && a.ServiceId == serviceId ) {
+        return { error: 'Name must be unique per service!' }
+      }
+    }
+    log.info( 'ADD ADAPTER service', service.data )
+    let adapterRec = { 
+        AdapterName  : adapterName,
+        ServiceId    : serviceId,
+        ServiceName  : service.data.ServiceId
+    }
+    log.info( 'ADD ADAPTER adapterRec', adapterRec )
+    let result = await axios.post( registerURL, adapterRec, HEADERS )
+    log.info( 'ADD ADAPTER', result.data )
+    return { status: 'OK', id: result.data.id }
+  } catch ( exc ) {
+    log.info( 'ADD ADAPTER', exc.message )
+    return { error:  exc.message }
+  }
+}
+
+// ----------------------------------------------------------------------------
+
+async function getServices( ) {
+  let svcList = await axios.get( SVC_DB_URL, HEADERS )
+  return svcList.data
+}
 
 // ============================================================================
 
-async function getAdapter( adapterId ) {
+async function getAdapter( adapterId, filter ) {
   try {
     if ( adapterId ) {
       let adapterResult = await axios.get( ADAPTER_DB_URL+'/'+adapterId, HEADERS )
@@ -124,7 +163,29 @@ async function getAdapter( adapterId ) {
 
     } else {
       let adapterResult = await axios.get( ADAPTER_DB_URL, HEADERS )
-      return adapterResult.data
+      if ( filter ) {
+        log.debug( 'filter', filter )
+        let result = {}
+        for ( let id in adapterResult.data ) {
+          log.debug( 'id', id, adapterResult.data[id] )
+
+          let idOk = false
+          for ( let fld in filter ) try {
+            log.debug( 'filter fld', fld )
+            if ( adapterResult.data[id][fld].toLowerCase().indexOf( filter[fld].toLowerCase() ) >= 0 ) {
+              idOk = true
+              break
+            }
+          } catch (exc) { log.warn( exc.message ) }
+          if ( idOk ) {
+            result[ id ] = adapterResult.data[ id ]
+          }
+        }
+        return result
+      } else {
+        return adapterResult.data
+      }
+      
     }
 
   } catch ( exc ) {
