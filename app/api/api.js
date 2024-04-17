@@ -71,9 +71,16 @@ async function stopWorker( req, res ) {
 
 async function registerPod( req, res ) {
   log.info( 'registerPod...', req.body )
-  if ( ! req.body.podId ) { return res.status(400).send('podId missing') }
+  if ( ! req.body.serviceId || ! req.body.workerId || ! req.body.callbackURL ) { 
+    return res.status(400).send() 
+  }
 
-  let uid = await db.registerPod( req.body.podId, 'ADAPTER', req.body.callbackURL )
+  let uid = await db.registerPod( 
+    req.body.serviceId, 
+    'ADAPTER', 
+    req.body.callbackURL,
+    req.body.workerId
+  )
 
   res.send({status: 'OK', id: uid })
 }

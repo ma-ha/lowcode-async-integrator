@@ -13,12 +13,13 @@ exports: module.exports = {
 }
 
 let id = '?'
+const WORKER_ID = require('os').hostname() +'-'+ process.pid
 
 async function init( podId, podConfig ) {
   let cfg = checkConfig( podConfig )
   cfg.ID = podId
 
-  cfg.POD_UID = await manager.registerPod( cfg.ID, cfg )
+  cfg.POD_UID = await manager.registerPod( cfg.ID, cfg, WORKER_ID )
 
   // await appAPI.setupAPI( cfg )
 }

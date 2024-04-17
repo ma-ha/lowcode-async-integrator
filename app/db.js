@@ -22,6 +22,7 @@ async function initDB( cfg ) {
   let appURL = cfg.LOWCODE_DB_API_URL +'/entity/'+ cfg.LOWCODE_DB_ROOTSCOPE + '/lowcode-integrator/0.1.0'
   SVC_DB_URL = appURL + '/LCI-Service'
   ADAPTER_DB_URL = appURL + '/LCI-Adapter'
+  WORKER_DB_URL = appURL + '/LCI-ServiceWorker'
 
   await prepareDbApp( cfg )
 }
@@ -63,42 +64,52 @@ async function prepareDbApp( cfg ) {
 
 // ============================================================================
 
-async function registerPod( podId, podMode, podURL ) {
+async function registerPod( serviceId, mode, callbackURL, workerId ) {
   try {
     log.info( 'INIT POD', SVC_DB_URL )
+    let needRegister = true
     let podList = await axios.get( SVC_DB_URL, HEADERS )
-    for ( let uid in podList.data ) {
-      if (  podList.data[ uid ].PodId == podId ) {
-        log.info( 'INIT POD: already registered', uid )
-        return uid
+    for ( let uid in podList.data ) {  
+      if ( podList.data[ uid ].ServiceId == serviceId ) {
+        log.info( 'INIT Service: already registered', uid )
+        needRegister = false
+        break
+      } 
+    }
+    if ( needRegister ) {
+      let podRec = { 
+        ServiceId : serviceId,
+        Mode      : mode,
+        ApiUrl    : callbackURL,
+        State     : 'Initialized',
       }
+  
+      let result = await axios.post( SVC_DB_URL, podRec, HEADERS )
+      log.info( 'REGISTER POD', result.data )
     }
 
-    let podRec = { 
-      PodId  : podId,
-      Mode   : podMode,
-      ApiUrl : podURL,
-      State  : 'Initialized'
-    }
-
-    let result = await axios.post( SVC_DB_URL, podRec, HEADERS )
-    log.info( 'REGISTER POD', result.data )
-
-    if ( podMode == 'ADAPTER' ) {
-      let registerURL =  ADAPTER_DB_URL+'/state/null/Register'
-      log.info( 'REGISTER ADAPTER', registerURL )
-      let adapterRec = { 
-        AdapterName  : podId,
-        PodId : podId
+    if ( mode == 'ADAPTER' ) {
+      let workerRec = { 
+        ServiceId : serviceId,
+        WorkerId  : workerId,
+        LastPing  : Date.now()
       }
-      let result2 = await axios.post( registerURL, adapterRec, HEADERS )
-      log.info( 'REGISTER ADAPTER', result2.data )
+      log.info( 'INIT POD workerRec', workerRec )
+      let result2 = await axios.post( WORKER_DB_URL, workerRec, HEADERS )
+      log.info( 'REGISTER WORKER', result2.data )
+      //   let registerURL =  ADAPTER_DB_URL+'/state/null/Register'
+      //   log.info( 'REGISTER ADAPTER', registerURL )
+      //   let adapterRec = { 
+      //     AdapterName  : podId,
+      //     PodId : podId
+      //   }
+      //   let result2 = await axios.post( registerURL, adapterRec, HEADERS )
     }
-    return result.data.id
+    // return result.data.id
 
   } catch ( exc ) {
     log.warn( 'INIT POD', exc.message )
-    if ( podMode == 'MANAGER' ) { process.exit() }
+    if ( mode == 'MANAGER' ) { process.exit() }
   }
 }
 

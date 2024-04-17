@@ -5,12 +5,13 @@ exports: module.exports = {
   registerPod
 }
 
-async function registerPod( podId, cfg ) {
+async function registerPod( podId, cfg, workerId ) {
   try {
     log.info( 'REGISTER ADAPTER ...' )
     let adaper = {
-      podId : podId,
-      callbackURL : cfg.POD_URL
+      serviceId : podId,
+      callbackURL : cfg.POD_URL,
+      workerId : workerId
     }
 
     let result = await axios.post(

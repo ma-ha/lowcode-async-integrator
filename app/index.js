@@ -17,13 +17,14 @@ exports: module.exports = {
 }
 
 let id = '?'
+const WORKER_ID = require('os').hostname() +'-'+ process.pid
 
 async function init( podId, podConfig ) {
   let cfg = checkConfig( podConfig )
   cfg.ID = podId
 
   await db.initDB( cfg )
-  cfg.POD_UID = await db.registerPod( cfg.ID, cfg.POD_MODE, cfg.POD_URL )
+  cfg.POD_UID = await db.registerPod( cfg.ID, cfg.POD_MODE, cfg.POD_URL, WORKER_ID )
 
   apiSec.init( cfg )
   let app = appGUI.init( cfg )
