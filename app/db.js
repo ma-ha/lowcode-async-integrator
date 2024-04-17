@@ -98,16 +98,8 @@ async function registerPod( serviceId, mode, callbackURL, workerId ) {
       }
       log.info( 'INIT POD workerRec', workerRec )
       let result2 = await axios.post( WORKER_DB_URL, workerRec, HEADERS )
-      log.info( 'REGISTER WORKER', result2.data )
-      //   let registerURL =  ADAPTER_DB_URL+'/state/null/Register'
-      //   log.info( 'REGISTER ADAPTER', registerURL )
-      //   let adapterRec = { 
-      //     AdapterName  : podId,
-      //     PodId : podId
-      //   }
-      //   let result2 = await axios.post( registerURL, adapterRec, HEADERS )
+      log.info( 'REGISTER WORKER', result2.data ) 
     }
-    // return result.data.id
 
   } catch ( exc ) {
     log.warn( 'INIT POD', exc.message )
