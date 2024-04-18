@@ -22,6 +22,7 @@ const IO_OPTS = {
   "Azure EH": { label: 'Azure<br>Event Hub', icon: 'img/k8s-ww-conn.png',
     formFields : [
       { id: "aze_ConnStr", label: "Event Hub Connection String", type: "text" },
+      { id: "aze_EventFilter", label: "Event Filter", type: "text" },
     ],
     inSignature : 'event',
     outSignature : 'await sendEvent( event )'
@@ -119,7 +120,7 @@ function getFormCfg( adapterId, dbAdapter ) {
       formFields : []
     } 
     for ( let fld of adapterCfg.formFields ) {
-      let cFld = JSON.parse( JSON.stringify( fld ))
+      let cFld = JSON.parse( JSON.stringify(  fld ))
       if ( dbAdapter[ fld.id ] ) {
         cFld.defaultVal = dbAdapter[ fld.id ]
       }

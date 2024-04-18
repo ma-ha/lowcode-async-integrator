@@ -16,7 +16,7 @@ exports: module.exports = {
 }
 
 
-const PRD_NAME = 'LowCode Async Integrator App'
+const PRD_NAME = 'LowCode Integrator'
 let cfg = {}
 
 function init( appConfig ) {
@@ -66,7 +66,7 @@ async function initPages( ) {
 
   // ..........................................................................
 
-   gui.dynamicTitle( async ( title, req, page ) => {  return ( cfg.TITLE ? cfg.TITLE : 'Low Code Async Integrator' ) } )
+   gui.dynamicTitle( async ( title, req, page ) => {  return ( cfg.TITLE ? cfg.TITLE : 'LowCode Integrator' ) } )
 
   // ..........................................................................
 
@@ -256,7 +256,7 @@ async function configureIoForm( staticRows, req, pageName )  {
     }
   }
 
-   let formCfg = adapters.getFormCfg( ioOpt, adapterCfgJSON )
+  let formCfg = adapters.getFormCfg( ioOpt, adapterCfgJSON )
   if ( ! formCfg ) { return [] }
 
   let rowArr = [] 
