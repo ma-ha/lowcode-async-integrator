@@ -84,7 +84,27 @@ async function registerPod( req, res ) {
     req.body.workerId
   )
 
-  res.send({status: 'OK', id: uid })
+  let adapterMap = getAdapter( null, { ServiceId: req.body.serviceId } )
+
+  let startAdapter = [] 
+  for ( let adapterId in adapterMap ) {
+    let adapter = adapterMap[ adapterId ]
+    if ( adapter._status == 'Started' ) {
+      let connDir = ( adapter.DataInputType ? 'in' : 'out' )
+      let typeId  = ( adapter.DataInputType ? adapter.DataInputType : adapter.DataOutputType )
+      startAdapter.push({
+        id      : adapterId,
+        connDir : connDir,
+        plugin  : adapters.getPlugin( typeId, dir )
+      })
+    }
+  }
+
+  res.send({
+    status: 'OK', 
+    id: uid,
+    startAdapter : startAdapter
+  })
 }
 
 async function getServiceOptions( req, res ) {

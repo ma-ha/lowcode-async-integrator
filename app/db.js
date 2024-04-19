@@ -155,6 +155,7 @@ async function getAdapter( adapterId, filter ) {
 
     } else {
       let adapterResult = await axios.get( ADAPTER_DB_URL, HEADERS )
+      log.info( 'adapterResult', adapterResult.data )
       if ( filter ) {
         log.debug( 'filter', filter )
         let result = {}
