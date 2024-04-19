@@ -2,7 +2,9 @@ const log    = require( './helper/log' ).logger
 const axios  = require( 'axios' )
 
 exports: module.exports = {
-  registerPod
+  registerPod,
+  startAdapter,
+  startAdapter
 }
 
 async function registerPod( podId, cfg, workerId ) {
@@ -23,10 +25,20 @@ async function registerPod( podId, cfg, workerId ) {
     )
     log.info( 'REGISTER ADAPTER', result.status, result.statusText, result.data )
     
-    return result.data.id
+    return result.data
 
   } catch ( exc ) {
     log.error( 'REGISTER ADAPTER', exc.message )
     process.exit()
   }
+}
+
+//---------------------------------------------------------------------------
+
+async function startAdapter( dir, id ) {
+
+}
+
+async function startAdapter( dir, id ) {
+  
 }

@@ -1,6 +1,7 @@
 
 const log        = require( './helper/log' ).logger
 const bodyParser = require( 'body-parser' )
+const express = require('express')
 
 exports: module.exports = { 
   setupAPI  
@@ -10,31 +11,35 @@ exports: module.exports = {
 // API:
 // now we need to implement the ReST service for /products 
 // this should also only be available for authenticated users
-let gui = null
+let svc = null
+let router = null
 
-async function setupAPI( cfg ) {
+let cfg = null
+async function setupAPI( config ) {
   log.info( 'Starting API...' )
+  cfg = config
 
-  let svc = app.getExpress()
-  gui = app
-
-  svc.use( bodyParser.urlencoded({  limit: "20mb", extended: false }) )
-  svc.use( bodyParser.json({ limit: "20mb" }) )
+  svc = express()
+  router = express.Router()
+  svc.use( cfg.POD_URL_PATH, router )
+  
+  router.use( bodyParser.urlencoded({  limit: "20mb", extended: false }) )
+  router.use( bodyParser.json({ limit: "20mb" }) )
 
   //---------------------------------------------------------------------------
   const clusterAuthz = clusterAuthzFn( cfg )
   
-  svc.get(  '/pod/config', clusterAuthz, getConfig )
-  svc.post( '/pod/config', clusterAuthz, setConfig )
+  router.get(  '/adapter/config/:dir/:id', clusterAuthz, getConfig )
+  router.post( '/adapter/config/:dir/:id', clusterAuthz, setConfig )
 
-  svc.post( '/pod/start', clusterAuthz, startWorker )
-  svc.post( '/pod/stop',  clusterAuthz, stopWorker )
+  router.post( '/adapter/start/:dir/:id', clusterAuthz, startWorker )
+  router.post( '/adapter/stop/:dir/:id',  clusterAuthz, stopWorker )
 
-  svc.get(  '/pod/stats', clusterAuthz, getStats )
+  router.get(  '/adapter/stats', clusterAuthz, getStats )
 
   // svc.delete('/adapter/entity/:scopeId/:entityId', apiAuthz, delCollection )
+  svc.listen( cfg.pPOD_PORT )
 }
-
 
 //---------------------------------------------------------------------------
 
@@ -70,13 +75,13 @@ async function stopWorker( req, res ) {
 // ----------------------------------------------------------------------------
 
 async function setConfig( req, res ) {
-  log.info( 'setConfig...')
+  log.info( 'setConfig...', req.params, req.body )
   // TODO implement
   res.send({status: 'OK'})
 }
 
 async function getConfig( req, res ) {
-  log.info( 'getConfig...')
+  log.info( 'getConfig...', req.params, req.query )
   // TODO implement
   res.send({status: 'OK'})
 }

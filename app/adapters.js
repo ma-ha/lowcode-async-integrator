@@ -6,62 +6,96 @@ exports: module.exports = {
   getFormCfg,
   getInSign,
   getOutSign,
+  getPlugin
 }
 
 // --------------------------------------------------------------------------
 
-const IO_OPTS = {
+const IO_OPTS = {}
+
+const IN_OPTS = {
   "RabbitMQ Queue": { label: 'RabbitMQ<br>Queue', icon: 'img/k8s-ww-conn.png',
     formFields : [
       { id: "rmq_URL",   label: "AMQP URL", type: "text" },
       { id: "rmq_Queue", label: "Queue Name", type: "text" },
     ],
-    inSignature : 'message, messageId',
-    outSignature : 'await sendToQueue( message, correlationId )'
+    signature : 'message, messageId',
+    plugin : "rmq-queue"
   },
   "Azure EH": { label: 'Azure<br>Event Hub', icon: 'img/k8s-ww-conn.png',
     formFields : [
       { id: "aze_ConnStr", label: "Event Hub Connection String", type: "text" },
       { id: "aze_EventFilter", label: "Event Filter", type: "text" },
     ],
-    inSignature : 'event',
-    outSignature : 'await sendEvent( event )'
+    signature : 'event',
+    plugin : "azure-eh"
   },
   "Azure SB": { label: 'Azure<br>Service Bus Queue', icon: 'img/k8s-ww-conn.png',
     formFields : [
       { id: "azsb_ConnStr", label: "Service Bus Connection String", type: "text" },
       { id: "azsb_Queue",   label: "Service Bus Queue", type: "text" },
     ],
-    inSignature : 'message, messageId',
-    outSignature : 'await sendToQueue( message, correlationId )'
+    signature : 'message, messageId',
+    plugin : "azure-sb"
   },
   "HTTP": { label: 'HTTP Endpoint', icon: 'img/k8s-ww-conn.png',
     formFields : [
       { id: "http_BaseURL",   label: "Base URL", type: "text" },
       { id: "http_HeaderKey", label: 'Header authorization "key"', type: "text" }
     ],
-    inSignature : 'header, param, query, body',
-    outSignature : 'await sendHttp( method, path, query, body )'
-  }
-}
-
-const IN_OPTS = {
+    signature : 'header, param, query, body',
+    plugin : "http"
+  },
   "RabbitMQ Subscription": { label: 'RabbitMQ<br>Subscription', icon: 'img/k8s-ww-conn.png',
     formFields : [
       { id: "rmq_URL",   label: "AMQP URL", type: "text" },
       { id: "rmq_Topic", label: "AMQP Topic", type: "text" },
     ],
-    inSignature : '',
+    signature : 'message, messageId',
+    plugin : "rmq-sub"
   },
 }
 
+
 const OUT_OPTS = {
+  "RabbitMQ Queue": { label: 'RabbitMQ<br>Queue', icon: 'img/k8s-ww-conn.png',
+    formFields : [
+      { id: "rmq_URL",   label: "AMQP URL", type: "text" },
+      { id: "rmq_Queue", label: "Queue Name", type: "text" },
+    ],
+    signature : 'await sendToQueue( message, correlationId )',
+    plugin : "rmq-queue"
+  },
+  "Azure EH": { label: 'Azure<br>Event Hub', icon: 'img/k8s-ww-conn.png',
+    formFields : [
+      { id: "aze_ConnStr", label: "Event Hub Connection String", type: "text" }
+    ],
+    signature : 'await sendEvent( event )',
+    plugin : "azure-eh"
+  },
+  "Azure SB": { label: 'Azure<br>Service Bus Queue', icon: 'img/k8s-ww-conn.png',
+    formFields : [
+      { id: "azsb_ConnStr", label: "Service Bus Connection String", type: "text" },
+      { id: "azsb_Queue",   label: "Service Bus Queue", type: "text" },
+    ],
+    signature : 'await sendToQueue( message, correlationId )',
+    plugin : "azure-sb"
+  },
+  "HTTP": { label: 'HTTP Endpoint', icon: 'img/k8s-ww-conn.png',
+    formFields : [
+      { id: "http_BaseURL",   label: "Base URL", type: "text" },
+      { id: "http_HeaderKey", label: 'Header authorization "key"', type: "text" }
+    ],
+    signature : 'await sendHttp( method, path, query, body )',
+    plugin : "http"
+  },
   "RabbitMQ Topic": { label: 'RabbitMQ<br>Topic', icon: 'img/k8s-ww-conn.png',
     formFields : [
       { id: "rmq_URL",   label: "AMQP URL", type: "text" },
       { id: "rmq_Topic", label: "AMQP Topic", type: "text" },
     ],
-    outSignature : 'await sendToTopic( message )'
+    signature : 'await sendToTopic( message )',
+    plugin : "rmq-topic"
   },
   "LowCode DB": { label: 'Low Code DB', icon: 'img/k8s-ww-conn.png',
     formFields : [
@@ -70,19 +104,22 @@ const OUT_OPTS = {
       { id: "lcDB_AppVer",   label: "App Version", type: "text" },
       { id: "lcDB_EntityId", label: "Entity ID", type: "text" },
     ],
-    outSignature : 'await storeDB( recId, data )'
+    signature : 'await storeDB( recId, data )',
+    plugin : "lowcode-db"
   },
   "Azure BLOB": { label: 'Azure<br>Storage BLOB', icon: 'img/k8s-ww-conn.png',
     formFields : [
       { id: "azb_ConnStr",  label: "Storage Connection String", type: "text" }
     ],
-    outSignature : 'await storeBLOB( container, data )'
+    signature : 'await storeBLOB( container, data )',
+    plugin : "azure-blob"
   },
   "InfluxDB": { label: 'InfluxDB', icon: 'img/k8s-ww-conn.png',
     formFields : [
       { id: "influxURL",  label: "InfluxDB URL", type: "text" },
     ],
-    outSignature : 'await storeTimeSeriesData( timestamp, key, value )'
+    signature : 'await storeTimeSeriesData( timestamp, key, value )',
+    plugin : "influxdb"
   },
   "HTTP OAuth": { label: 'HTTP Endpoint with OAuth', icon: 'img/k8s-ww-conn.png',
     formFields : [
@@ -90,24 +127,31 @@ const OUT_OPTS = {
       { id: "http_OAuthId",  label: "Auth ID",  type: "text" },
       { id: "http_OAuthKey", label: "Auth Key", type: "text" }
     ],
-    outSignature : 'await sendHttp( method, path, query, body )'
+    signature : 'await sendHttp( method, path, query, body )',
+    plugin : "http-oauth"
   }
 }
 
 // --------------------------------------------------------------------------
 
 function getInSign( typeId ) {
-  if ( IO_OPTS[ typeId ] ) { return IO_OPTS[ typeId ].inSignature }
-  if ( IN_OPTS[ typeId ] ) { return IO_OPTS[ typeId ].inSignature }
+  if ( IN_OPTS[ typeId ] ) { return IN_OPTS[ typeId ].signature }
   return ''
 }
 
 function getOutSign( typeId ) {
-  if ( IO_OPTS[ typeId ]  ) { return IO_OPTS[ typeId ].outSignature }
-  if ( OUT_OPTS[ typeId ] ) { return IO_OPTS[ typeId ].outSignature }
+  if ( OUT_OPTS[ typeId ] ) { return OUT_OPTS[ typeId ].signature }
   return ''
 }
 
+
+function getPlugin( typeId, dir ) {
+  if ( dir == 'in' ) {
+    return IN_OPTS[ typeId ].plugin
+  } else {
+    return OUT_OPTS[ typeId ].plugin
+  }
+}
 // --------------------------------------------------------------------------
 
 function getFormCfg( adapterId, dbAdapter ) {
@@ -138,28 +182,19 @@ function getFormCfg( adapterId, dbAdapter ) {
 // --------------------------------------------------------------------------
 
 function getInIcons( adapterId ) {
-  return getIcons( adapterId, 'Input', IO_OPTS, IN_OPTS )
+  return getIcons( adapterId, 'Input', IN_OPTS )
 }
 
 
 function getOutIcons( adapterId ) {
-  return  getIcons( adapterId, 'Output', IO_OPTS, OUT_OPTS )
+  return  getIcons( adapterId, 'Output', OUT_OPTS )
 }
 
 
-function getIcons( adapterId, direct, opMap1, optMap2 ) {
+function getIcons( adapterId, direct, optMap ) {
   let icons = []
-  for ( let optId in opMap1 ) {
-    let opt = opMap1[ optId ]
-    icons.push({ 
-      id     : optId, 
-      label  : opt.label, 
-      img    : opt.icon,
-      layout : 'ConfigureIO-nonav&id='+direct+','+ optId +','+ adapterId
-    })
-  }
-  for ( let optId in optMap2 ) {
-    let opt = optMap2[ optId ]
+  for ( let optId in optMap ) {
+    let opt = optMap[ optId ]
     icons.push({ 
       id     : optId, 
       label  : opt.label, 

@@ -1,12 +1,13 @@
 /* LOWCODE-ASYNC-INTEGRATOR / copyright 2024 by ma-ha https://github.com/ma-ha  /  MIT License */
 
-const log       = require( './helper/log' ).logger
-const pjson     = require( './package.json' )
+const log   = require( './helper/log' ).logger
+const pjson = require( './package.json' )
+const fs    = require( 'fs' )
 
 log.info( `Starting ${pjson.name} v${pjson.version} NODE_ENV=${process.env.NODE_ENV}` )
 
-const manager   = require( './manager' )
-const appAPI    = require( './api' )
+const manager = require( './manager' )
+const appAPI  = require( './api' )
 
 exports: module.exports = {
   init
@@ -19,9 +20,15 @@ async function init( podId, podConfig ) {
   let cfg = checkConfig( podConfig )
   cfg.ID = podId
 
-  cfg.POD_UID = await manager.registerPod( cfg.ID, cfg, WORKER_ID )
+  let regResult = await manager.registerPod( cfg.ID, cfg, WORKER_ID )
+  log.info( 'regResult', regResult )
+  cfg.POD_UID = regResult.id
 
-  // await appAPI.setupAPI( cfg )
+  await appAPI.setupAPI( cfg )
+
+  for ( let adapter of  regResult.startAdapter ) {
+    manager.startAdapter( adapter.dir, adapter.id )
+  }
 }
 
 // ============================================================================
@@ -32,8 +39,16 @@ function checkConfig( cfg ) {
 
   checkCfgParam( cfg, 'POD_MODE', 'MANAGER' )
 
-  checkCfgParam( cfg, 'CONFIG_DIR', '../pod-cfg/' )
-  
+  checkCfgParam( cfg, 'CONFIG_DIR', '../pod-cfg' )
+  if ( ! fs.existsSync( cfg.CONFIG_DIR ) ) {
+    fs.mkdirSync( cfg.CONFIG_DIR )
+  }
+  // todo check fpr tailing /
+  cfg.SVC_CONFIG_DIR = cfg.CONFIG_DIR +'/'+ podId 
+  if ( ! fs.existsSync( cfg.SVC_CONFIG_DIR ) ) {
+    fs.mkdirSync( cfg.SVC_CONFIG_DIR )
+  }
+
   checkCfgParam( cfg, 'POD_URL_PATH', '/' )
   checkCfgParam( cfg, 'POD_PORT', 8889 )
   checkCfgParam( cfg, 'POD_URL','http://localhost:' + cfg.POD_PORT + cfg.URL_PATH )
