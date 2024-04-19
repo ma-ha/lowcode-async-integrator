@@ -46,7 +46,7 @@ const IO_OPTS = {
 }
 
 const IN_OPTS = {
-  "RabbitMQ Subscribtion": { label: 'RabbitMQ<br>Subscription', icon: 'img/k8s-ww-conn.png',
+  "RabbitMQ Subscription": { label: 'RabbitMQ<br>Subscription', icon: 'img/k8s-ww-conn.png',
     formFields : [
       { id: "rmq_URL",   label: "AMQP URL", type: "text" },
       { id: "rmq_Topic", label: "AMQP Topic", type: "text" },
