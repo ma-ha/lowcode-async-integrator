@@ -7,9 +7,11 @@ exports: module.exports = {
   initDB,
   registerPod,
   getServices,
+  getServiceById,
   addAdapter,
   getAdapter,
-  saveAdapter
+  saveAdapter,
+  changeAdapterStatus
 }
 
 let HEADERS = null
@@ -126,7 +128,8 @@ async function addAdapter( serviceId, adapterName ) {
     let adapterRec = { 
         AdapterName  : adapterName,
         ServiceId    : serviceId,
-        ServiceName  : service.data.ServiceId
+        ServiceName  : service.data.ServiceId,
+        StateSince   : getDateStr()
     }
     log.info( 'ADD ADAPTER adapterRec', adapterRec )
     let result = await axios.post( registerURL, adapterRec, HEADERS )
@@ -138,10 +141,36 @@ async function addAdapter( serviceId, adapterName ) {
   }
 }
 
+async function changeAdapterStatus( id, state, action ) {
+  try {
+    let url =  ADAPTER_DB_URL+'/state/'+state+'/'+action
+    log.info( 'changeAdapterStatus', url, )
+    let result = await axios.post( url, { id: id, StateSince: getDateStr() }, HEADERS )
+    log.info( 'changeAdapterStatus', result.data )
+    return result.data      
+  } catch ( exc ) {
+    log.warn( 'changeAdapterStatus', exc.message )
+    return { error: exc.message }
+    
+  }
+}
+
+
+function getDateStr() {
+  let dt = new Date()
+  let str = dt.toISOString()
+  return str.substring( 0, 16 ).replace( 'T', ' ' )
+}
+
 // ----------------------------------------------------------------------------
 
 async function getServices( ) {
   let svcList = await axios.get( SVC_DB_URL, HEADERS )
+  return svcList.data
+}
+
+async function getServiceById( id ) {
+  let svcList = await axios.get( SVC_DB_URL+'/'+id, HEADERS )
   return svcList.data
 }
 
@@ -155,7 +184,7 @@ async function getAdapter( adapterId, filter ) {
 
     } else {
       let adapterResult = await axios.get( ADAPTER_DB_URL, HEADERS )
-      log.info( 'adapterResult', adapterResult.data )
+      log.debug( 'adapterResult', adapterResult.data )
       if ( filter ) {
         log.debug( 'filter', filter )
         let result = {}
@@ -189,7 +218,7 @@ async function getAdapter( adapterId, filter ) {
 
 async function saveAdapter( adapter ) {
   let adapterResult = await axios.put( ADAPTER_DB_URL+'/'+adapter.id, adapter, HEADERS )
-  log.info( 'saveAdapter', adapterResult )
+  log.debug( 'saveAdapter', adapterResult.data )
   return adapterResult
 }
 

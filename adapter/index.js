@@ -24,6 +24,12 @@ async function init( podId, podConfig ) {
   log.info( 'regResult', regResult )
   cfg.POD_UID = regResult.id
 
+  // todo check fpr tailing /
+  cfg.SVC_CONFIG_DIR = cfg.CONFIG_DIR +'/'+ cfg.POD_UID 
+  if ( ! fs.existsSync( cfg.SVC_CONFIG_DIR ) ) {
+    fs.mkdirSync( cfg.SVC_CONFIG_DIR )
+  }
+  
   await appAPI.setupAPI( cfg )
 
   for ( let adapter of  regResult.startAdapter ) {
@@ -42,11 +48,6 @@ function checkConfig( cfg ) {
   checkCfgParam( cfg, 'CONFIG_DIR', '../pod-cfg' )
   if ( ! fs.existsSync( cfg.CONFIG_DIR ) ) {
     fs.mkdirSync( cfg.CONFIG_DIR )
-  }
-  // todo check fpr tailing /
-  cfg.SVC_CONFIG_DIR = cfg.CONFIG_DIR +'/'+ podId 
-  if ( ! fs.existsSync( cfg.SVC_CONFIG_DIR ) ) {
-    fs.mkdirSync( cfg.SVC_CONFIG_DIR )
   }
 
   checkCfgParam( cfg, 'POD_URL_PATH', '/' )

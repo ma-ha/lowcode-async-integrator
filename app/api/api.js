@@ -20,6 +20,8 @@ let gui = null
 async function setupAPI( app, cfg ) {
   log.info( 'Starting API...' )
 
+  adapters.init( cfg )
+
   let svc = app.getExpress()
   gui = app
 
@@ -46,6 +48,7 @@ async function setupAPI( app, cfg ) {
   svc.get(  '/adapter/output/icons', guiAuthz, getOutputIcons )
   svc.post( '/adapter/input', apiAuthz, setAdapterInput )
   svc.post( '/adapter/output', apiAuthz, setAdapterOutput )
+  svc.get(  '/adapter/:id/status/:action', guiAuthz, setAdapterStatus ) // get is simpler as link
 
   svc.get(  '/adapter/code', guiAuthz, getAdapterCode )
   svc.post( '/adapter/code', apiAuthz, saveAdapterCode )
@@ -166,40 +169,46 @@ async function addAdapter( req, res ) {
 // ----------------------------------------------------------------------------
 
 async function getAdapter( req, res ) {
-  log.debug( 'getAdapter...', req.query )
-  let filter = null
-  if ( req.query.dataFilter ) {
-    if ( req.query.dataFilter.ServiceName && req.query.dataFilter.ServiceName != '' ) {
-      if ( ! filter ) { filter = {} }
-      filter.ServiceName = req.query.dataFilter.ServiceName 
+  try {
+    log.debug( 'getAdapter...' )
+    let filter = null
+    if ( req.query.dataFilter ) {
+      if ( req.query.dataFilter.ServiceName && req.query.dataFilter.ServiceName != '' ) {
+        if ( ! filter ) { filter = {} }
+        filter.ServiceName = req.query.dataFilter.ServiceName 
+      }
+      if ( req.query.dataFilter.DataInputType && req.query.dataFilter.DataInputType != '' ) {
+        if ( ! filter ) { filter = {} }
+        filter.DataInputType = req.query.dataFilter.DataInputType 
+      }
+      if ( req.query.dataFilter.DataInputType && req.query.dataFilter.DataOutputType != '' ) {
+        if ( ! filter ) { filter = {} }
+        filter.DataOutputType = req.query.dataFilter.DataOutputType 
+      }
     }
-    if ( req.query.dataFilter.DataInputType && req.query.dataFilter.DataInputType != '' ) {
-      if ( ! filter ) { filter = {} }
-      filter.DataInputType = req.query.dataFilter.DataInputType 
+    let adapterMap = await db.getAdapter( null, filter )
+    let adapterArray = []
+
+    for ( let uid in adapterMap ) {
+      let dbRec = adapterMap[ uid ]
+      let codeLbl = (  dbRec._state == 'ConfigPending' ? 'Edit' : 'Show' )
+      let adapter = {
+        id     : uid,
+        State  : dbRec._state,
+        Since  : dbRec.StateSince,
+        Service: dbRec.ServiceName,
+        Name   : dbRec.AdapterName,
+        Input  : getResLnk( uid, dbRec, 'Input' ),
+        Code   : '<a href="index.html?layout=EditCode-nonav&id='+uid+'">'+codeLbl+'</a>',
+        Output : getResLnk( uid, dbRec, 'Output' ),
+        Action : getActionLnk( dbRec ),
+        Log    : dbRec.Log
+      }
+      adapterArray.push( adapter )
     }
-    if ( req.query.dataFilter.DataInputType && req.query.dataFilter.DataOutputType != '' ) {
-      if ( ! filter ) { filter = {} }
-      filter.DataOutputType = req.query.dataFilter.DataOutputType 
-    }
-  }
-  let adapterMap = await db.getAdapter( null, filter )
-  let adapterArray = []
-  for ( let uid in adapterMap ) {
-    let dbRec = adapterMap[ uid ]
-    let adapter = {
-      id     : uid,
-      State  : dbRec._state,
-      Service: dbRec.ServiceName,
-      Name   : dbRec.AdapterName,
-      Input  : getResLnk( uid, dbRec, 'Input' ),
-      Code   : '<a href="index.html?layout=EditCode-nonav&id='+uid+'">Edit Code</a>',
-      Output : getResLnk( uid, dbRec, 'Output' ),
-      Action : getActionLnk( uid, dbRec._state )
-    }
-    adapterArray.push( adapter )
-  }
-  log.debug( 'getAdapter', adapterArray )
-  res.send( adapterArray )
+    log.debug( 'getAdapter', adapterArray )
+    res.send( adapterArray )
+  } catch ( exc ) { log.warn( 'getAdapter', exc.message ) }
 }
 
 function getResLnk( id, rec, resDir ) {
@@ -228,25 +237,71 @@ function extractFilter( filterQuery ){
   return filter
 }
 
+// ----------------------------------------------------------------------------
 
-function getActionLnk( id, dbRec ) {
+function getActionLnk( dbRec ) {
   let lnk = ''
-  if ( ! dbRec.Output || ! dbRec.Input ) { return 'configuration required' }
+  log.debug( 'getActionLnk', dbRec.AdapterName, dbRec.DataInputType , dbRec.DataInputType )
+  if ( ! dbRec.DataInputType  ) { return 'configuration required' }
+  if ( ! dbRec.DataOutputType ) { return 'configuration required' }
   switch ( dbRec._state ) {
     case 'ConfigPending':
-      lnk = '<a href="">Start</a>'
+      lnk = '<a href="adapter/'+dbRec.id+'/status/Start">Start</a>'
       break
     case 'Started':
-      lnk = '<a href="">Stop</a>'
+      lnk = '<a href="adapter/'+dbRec.id+'/status/Stop">Stop</a>'
       break
     case 'Stopped':
-      lnk = '<a href="">Started</a>'
-      lnk += '<a href="">Reconfigure</a>'
+      lnk =  '<a href="adapter/'+dbRec.id+'/status/Restart">Start</a>'
+      lnk += ' <a href="adapter/'+dbRec.id+'/status/Reconfigure">Reconfigure</a>'
       break
   
     default: break
   }
   return lnk
+}
+
+
+async function setAdapterStatus( req, res ) {
+  try {
+     let adapter = await db.getAdapter( req.params.id )
+    let service = await db.getServiceById( adapter.ServiceId )
+    let action = req.params.action
+    let statusLog = null
+    let ok = true
+    if ( action == 'Start' ) {
+      let result = await adapters.startAdapter( service.ApiUrl, adapter.id )
+      log.info( 'setAdapterStatus', result )
+      if ( result.status == 'OK' ) {
+        statusLog = 'Started '+getDateStr()
+      } else {
+        statusLog = 'Start FAILED '+getDateStr()
+        ok = false
+      }
+    } else if ( action == 'Stop' ) {
+      let result = await adapters.stopAdapter( service.ApiUrl, adapter.id )
+      log.info( 'setAdapterStatus', result )
+      if (  result.status == 'OK' ) {
+        statusLog = 'Stopped '+getDateStr()
+      } else {
+        statusLog = 'Stop FAILED '+getDateStr()
+        ok = false
+      }
+    } 
+    if ( statusLog ) { 
+      await db.saveAdapter({ id: adapter.id, Log: statusLog })
+    }
+    if ( ok ) {
+      await db.changeAdapterStatus( adapter.id, adapter._state, action )
+    }``
+  } catch ( exc ) { log.error( 'setAdapterStatus', exc ) }
+  res.redirect( '../../../index.html?layout=Adapter' )
+}
+
+function getDateStr() {
+  let dt = new Date()
+  let str = dt.toISOString()
+  return str.substring( 0, 16 ).replace( 'T', ' ' )
 }
 
 // ----------------------------------------------------------------------------

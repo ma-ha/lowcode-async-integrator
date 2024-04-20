@@ -1,12 +1,51 @@
-const log     = require( './helper/log' ).logger
+const log    = require( './helper/log' ).logger
+const axios  = require( 'axios' )
 
 exports: module.exports = {
+  init,
+  stopAdapter,
+  startAdapter,
   getInIcons,
   getOutIcons,
   getFormCfg,
   getInSign,
   getOutSign,
   getPlugin
+}
+
+
+let HEADERS = null
+
+async function init( cfg ) {
+  HEADERS = { headers: { 
+    'cluster_key' : cfg.CLUSTER_KEY
+  }}
+}
+
+async function stopAdapter( serviceURL, adapterId ) {
+  try {
+    let url = serviceURL+'/adapter/stop/'+adapterId
+    log.info( 'stopAdapter', url, )
+    let result = await axios.post( url, { id: adapterId }, HEADERS )
+    log.info( 'stopAdapter', result.data )
+    return result.data      
+  } catch ( exc ) {
+    log.warn( 'stopAdapter', exc.message )
+    return { error: exc.message }
+  }
+}
+
+async function startAdapter( serviceURL, adapterId ) {
+  try {
+    let url = serviceURL+'/adapter/stop/'+adapterId
+    log.info( 'startAdapter', url, )
+    let result = await axios.post( url, { id: adapterId }, HEADERS )
+    log.info( 'startAdapter', result.data )
+    return result.data      
+  } catch ( exc ) {
+    log.warn( 'startAdapter', exc.message )
+    return { error: exc.message }
+  }
 }
 
 // --------------------------------------------------------------------------

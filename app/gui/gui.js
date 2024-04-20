@@ -105,13 +105,15 @@ async function initPages( ) {
         dataReqParamsSrc : 'Form'
       },
       cols: [
-        { id: "State",   label: "State", width: "10%", cellType: "text" },
-        { id: "Service", label: "Service", width: "10%", cellType: "text" },
-        { id: "Name",    label: "Name",  width: "10%", cellType: "text" },
-        { id: "Input",   label: "Input", width: "10%", cellType: "text" },
-        { id: "Code",    label: "Code",  width: "10%", cellType: "text" },
-        { id: "Output",  label: "Output",width: "10%", cellType: "text" },
-        { id: "Action",  label: "Action", width: "10%", cellType: "text" }
+        { id: "State",   label: "State",  width: "5%", cellType: "text" },
+        { id: "Since",   label: "Since",  width: "10%", cellType: "text" },
+        { id: "Service", label: "Service",width: "12%", cellType: "text" },
+        { id: "Name",    label: "Name",   width: "12%", cellType: "text" },
+        { id: "Input",   label: "Input",  width: "12%", cellType: "text" },
+        { id: "Code",    label: "Code",   width: "5", cellType: "text" },
+        { id: "Output",  label: "Output", width: "12%", cellType: "text" },
+        { id: "Action",  label: "Action", width: "10%", cellType: "text" },
+        { id: "Log",     label: "Log",    width: "15%", cellType: "text" }
       ],
       pollDataSec: "15",
     }
@@ -156,6 +158,14 @@ async function initPages( ) {
     inSig  = adapters.getInSign( dbAdapter.DataInputType )
     outSig = adapters.getOutSign( dbAdapter.DataOutputType )
 
+    let actions = []
+    if ( dbAdapter._state == 'ConfigPending') {
+      actions =[ 
+        { id: "AdapterCodeSaveBtn", actionName: "Save", 
+          actionURL: 'adapter/code', target: "modal" }
+      ]
+    }
+
     let rowArr = [] 
     rowArr.push({
       id: 'AdapterCodeEdit', rowId: 'AdapterCodeEdit',
@@ -180,10 +190,7 @@ async function initPages( ) {
             ]
           }
         ] }],
-        actions : [ 
-          { id: "AdapterCodeSaveBtn", actionName: "Save", 
-            actionURL: 'adapter/code', target: "modal" }
-        ]
+        actions : actions
       }
     })
     return rowArr
@@ -269,6 +276,16 @@ async function configureIoForm( staticRows, req, pageName )  {
     formCfg.formFields
   )
   
+  let actions = []
+    if ( dbAdapter._state == 'ConfigPending') {
+      actions = [ 
+        { id: "AdapterIoConfigSaveBtn", actionName: "Save", 
+          actionURL: 'adapter/'+ioDir, target: "modal" },
+        { id: "AdapterIoConfigChange", link: 'Change Type', 
+          target: '_parent',
+          linkURL: 'index.html?layout=Select'+ioDir+'-nonav&id='+adapterId }
+      ]
+    }
 
   rowArr.push({
     id: 'AdapterIoConfig', rowId: 'AdapterIoConfig',
@@ -278,13 +295,7 @@ async function configureIoForm( staticRows, req, pageName )  {
       label: formCfg.label,
       id: 'AdapterIoConfigForm',
       fieldGroups:[{ columns: [{ formFields: formFields }] }],
-      actions : [ 
-        { id: "AdapterIoConfigSaveBtn", actionName: "Save", 
-          actionURL: 'adapter/'+ioDir, target: "modal" },
-        { id: "AdapterIoConfigChange", link: 'Change Type', 
-          target: '_parent',
-          linkURL: 'index.html?layout=Select'+ioDir+'-nonav&id='+adapterId }
-      ]
+      actions : actions
     }
   })
 
