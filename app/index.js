@@ -84,14 +84,14 @@ function checkOidcParams( cfg ) {
       AUDIENCE: 'http://localhost:8888/',
       AUTH_DOMAIN: 'localhost',
       AUTH_SCOPE: 'read:all',
-      LOGIN_URL:  'oidc/authorize',
-      LOGOUT_URL: 'oidc/logout',
+      LOGIN_URL:  'http://localhost:8888/app/oidc/authorize',
+      LOGOUT_URL: 'http://localhost:8888/app/oidc/logout',
       CHANGE_PWD_URL: 'index.html?layout=change-password-nonav',
       REGISTER_URL: 'http://localhost:8888/index.html?layout=product-nonav&id=5d380c06abc348168ba62ec6',
       PWD_RESET_URL: 'http://localhost:8888/index.html?layout=main',
   
-      LOGIN_REDIRECT: 'http://localhost:8888/app/index.html',
-      LOGOUT_REDIRECT: 'http://localhost:8888/app/index.html',
+      LOGIN_REDIRECT:  'http://localhost:8889/pod-mgr/index.html',
+      LOGOUT_REDIRECT: 'http://localhost:8889/pod-mgr/index.html',
       userSessionExpireMin : 60
     }
   }

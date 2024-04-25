@@ -54,7 +54,7 @@ function init( gui, allCfg ) {
 
   // check authorization for GUI pages 
   gui.authorize = async ( user, page ) => {
-    return true  
+    // return true  
     log.debug( 'autz', user, page )
     if ( publicPages.indexOf( page ) >= 0  || page.indexOf( 'Docu' ) == 0 ) {
         // log.info( 'All users are authorized for page "'+page+'", also "'+user+'"' )
